@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberOpoly - Cybersecurity Monopoly Game</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Three.js for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Cannon.js for physics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
 </head>
 <body>
     <div id="game-container">
@@ -41,6 +45,9 @@
 
                 <div class="game-layout">
                     <div id="board-container">
+                        <!-- 3D Dice Canvas -->
+                        <div id="dice-box"></div>
+
                         <div id="board">
                             <!-- Board spaces will be generated dynamically -->
                         </div>
@@ -102,6 +109,7 @@
     <script src="js/player.js"></script>
     <script src="js/board.js"></script>
     <script src="js/cards.js"></script>
+    <script src="js/dice3d.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
 </body>

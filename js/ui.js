@@ -149,7 +149,7 @@ class UIManager {
     }
 
     // Start game
-    startGame() {
+    async startGame() {
         const rows = this.playerNamesContainer.querySelectorAll('.player-setup-row');
         const playerData = Array.from(rows).map((row, index) => {
             const nameInput = row.querySelector('.player-name-field');
@@ -172,6 +172,12 @@ class UIManager {
         // Show game screen
         this.setupScreen.classList.remove('active');
         this.gameScreen.classList.add('active');
+
+        // Initialize 3D dice
+        if (window.dice3D && !window.dice3D.isInitialized) {
+            console.log("Initializing 3D dice...");
+            await window.dice3D.initialize();
+        }
 
         // Update UI
         this.updateAll();
@@ -489,8 +495,52 @@ class UIManager {
     }
 
     // Roll dice
-    rollDice() {
-        // Animate dice
+    async rollDice() {
+        // Check if 3D dice is available
+        if (window.dice3D && window.dice3D.isInitialized) {
+            // Use 3D dice
+            this.rollDiceBtn.disabled = true;
+            window.dice3D.show();
+
+            try {
+                const diceResult = await window.dice3D.roll();
+
+                if (diceResult) {
+                    // Update the visual dice display
+                    this.dice1.textContent = diceResult.die1;
+                    this.dice2.textContent = diceResult.die2;
+
+                    // Pass the result to the game with specific values
+                    const gameResult = this.game.rollDice(diceResult.die1, diceResult.die2);
+
+                    // Wait a moment to show the dice
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Hide and clear the 3D dice
+                    window.dice3D.hide();
+
+                    // Small delay before clearing
+                    setTimeout(() => {
+                        window.dice3D.clear();
+                    }, 300);
+
+                    this.updateAll();
+                }
+            } catch (error) {
+                console.error("Error with 3D dice:", error);
+                // Fall back to regular dice roll
+                this.rollDiceFallback();
+            }
+
+            this.rollDiceBtn.disabled = false;
+        } else {
+            // Fallback to simple dice animation
+            this.rollDiceFallback();
+        }
+    }
+
+    // Fallback dice roll (original animation)
+    rollDiceFallback() {
         this.dice1.classList.add('rolling');
         this.dice2.classList.add('rolling');
 

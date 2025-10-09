@@ -36,14 +36,15 @@ class Game {
     }
 
     // Roll dice
-    rollDice() {
+    rollDice(forcedDie1 = null, forcedDie2 = null) {
         if (this.turnPhase !== 'roll') {
             this.log("You must end your turn first!");
             return null;
         }
 
-        const die1 = Math.floor(Math.random() * 6) + 1;
-        const die2 = Math.floor(Math.random() * 6) + 1;
+        // Use forced values from 3D dice if provided, otherwise generate random
+        const die1 = forcedDie1 || Math.floor(Math.random() * 6) + 1;
+        const die2 = forcedDie2 || Math.floor(Math.random() * 6) + 1;
         this.lastDiceRoll = [die1, die2];
 
         const total = die1 + die2;
