@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberOpoly - Cybersecurity Monopoly Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="main-content">
+            <!-- Game Setup Screen -->
+            <div id="setup-screen" class="screen active">
+                <div class="setup-container">
+                    <div class="setup-header">
+                        <h1>CyberOpoly</h1>
+                        <p class="setup-tagline">Learn Cybersecurity While You Play</p>
+                    </div>
+                    <h2>Game Setup</h2>
+                    <div class="setup-form">
+                        <label for="player-count">Number of Players (1-4):</label>
+                        <select id="player-count">
+                            <option value="1">1 Player</option>
+                            <option value="2" selected>2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                        </select>
+
+                        <div id="player-names-container">
+                            <!-- Player name inputs will be added dynamically -->
+                        </div>
+
+                        <button id="start-game-btn" class="btn btn-primary">Start Game</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Board Screen -->
+            <div id="game-screen" class="screen">
+
+                <div class="game-layout">
+                    <div id="board-container">
+                        <div id="board">
+                            <!-- Board spaces will be generated dynamically -->
+                        </div>
+
+                        <div id="center-info">
+                            <div class="logo-area">
+                                <h2>CyberOpoly</h2>
+                            </div>
+                            <div id="dice-container">
+                                <div id="dice1" class="dice">?</div>
+                                <div id="dice2" class="dice">?</div>
+                            </div>
+                            <button id="roll-dice-btn" class="btn btn-primary">Roll Dice</button>
+                        </div>
+                    </div>
+
+                    <div id="sidebar">
+                        <div id="current-player-info" class="panel">
+                            <h3>Current Turn</h3>
+                            <div id="player-turn-display"></div>
+                        </div>
+
+                        <div id="players-panel" class="panel">
+                            <h3>Players</h3>
+                            <div id="players-list"></div>
+                        </div>
+
+                        <div id="actions-panel" class="panel">
+                            <h3>Actions</h3>
+                            <div id="action-buttons">
+                                <button id="buy-property-btn" class="btn" disabled>Buy Property</button>
+                                <button id="upgrade-property-btn" class="btn" disabled>Upgrade Security</button>
+                                <button id="mortgage-btn" class="btn" disabled>Mortgage</button>
+                                <button id="trade-btn" class="btn" disabled>Trade</button>
+                                <button id="end-turn-btn" class="btn" disabled>End Turn</button>
+                            </div>
+                        </div>
+
+                        <div id="game-log-panel" class="panel">
+                            <h3>Game Log</h3>
+                            <div id="game-log"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for property info, cards, etc. -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript modules -->
+    <script src="js/data.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/cards.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
