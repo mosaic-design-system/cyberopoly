@@ -173,11 +173,18 @@ class UIManager {
         this.setupScreen.classList.remove('active');
         this.gameScreen.classList.add('active');
 
-        // Initialize 3D dice
-        if (window.dice3D && !window.dice3D.isInitialized) {
-            console.log("Initializing 3D dice...");
-            await window.dice3D.initialize();
-        }
+        // Initialize 3D dice (with a small delay to ensure libraries are loaded)
+        setTimeout(async () => {
+            if (window.dice3D && !window.dice3D.isInitialized) {
+                console.log("Initializing 3D dice...");
+                const success = window.dice3D.initialize();
+                if (success) {
+                    console.log("3D dice ready!");
+                } else {
+                    console.log("3D dice initialization failed, will use 2D fallback");
+                }
+            }
+        }, 100);
 
         // Update UI
         this.updateAll();

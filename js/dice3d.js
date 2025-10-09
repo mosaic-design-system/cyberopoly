@@ -14,6 +14,16 @@ class Dice3D {
 
     initialize() {
         try {
+            // Check if libraries are loaded
+            if (typeof THREE === 'undefined') {
+                console.error("Three.js not loaded");
+                return false;
+            }
+            if (typeof CANNON === 'undefined') {
+                console.error("Cannon.js not loaded");
+                return false;
+            }
+
             this.container = document.getElementById('dice-box');
             if (!this.container) {
                 console.error("Dice container not found");
@@ -159,8 +169,8 @@ class Dice3D {
             material: new CANNON.Material()
         });
 
-        dieBody.position.copy(position);
-        dieBody.quaternion.copy(rotation);
+        dieBody.position.set(position.x, position.y, position.z);
+        dieBody.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
 
         // Add random angular velocity for spinning
         dieBody.angularVelocity.set(
@@ -202,21 +212,27 @@ class Dice3D {
             return null;
         }
 
+        // Check if CANNON is available
+        if (typeof CANNON === 'undefined') {
+            console.error("Cannon.js not loaded");
+            return null;
+        }
+
         this.isRolling = true;
 
         // Clear previous dice
         this.clear();
 
         // Create two dice with random positions and throws
-        const die1 = this.createDie(
-            new CANNON.Vec3(-2, 8, 0),
-            new CANNON.Quaternion().setFromAxisAngle(new CANNON.Vec3(1, 1, 0), Math.random() * Math.PI)
-        );
+        const position1 = new CANNON.Vec3(-2, 8, 0);
+        const rotation1 = new CANNON.Quaternion();
+        rotation1.setFromAxisAngle(new CANNON.Vec3(1, 1, 0), Math.random() * Math.PI);
+        const die1 = this.createDie(position1, rotation1);
 
-        const die2 = this.createDie(
-            new CANNON.Vec3(2, 8, 0),
-            new CANNON.Quaternion().setFromAxisAngle(new CANNON.Vec3(0, 1, 1), Math.random() * Math.PI)
-        );
+        const position2 = new CANNON.Vec3(2, 8, 0);
+        const rotation2 = new CANNON.Quaternion();
+        rotation2.setFromAxisAngle(new CANNON.Vec3(0, 1, 1), Math.random() * Math.PI);
+        const die2 = this.createDie(position2, rotation2);
 
         // Add throwing force
         die1.body.velocity.set(
@@ -245,8 +261,8 @@ class Dice3D {
 
                 // Update visual positions from physics
                 this.dice.forEach(die => {
-                    die.mesh.position.copy(die.body.position);
-                    die.mesh.quaternion.copy(die.body.quaternion);
+                    die.mesh.position.set(die.body.position.x, die.body.position.y, die.body.position.z);
+                    die.mesh.quaternion.set(die.body.quaternion.x, die.body.quaternion.y, die.body.quaternion.z, die.body.quaternion.w);
                 });
 
                 // Render
