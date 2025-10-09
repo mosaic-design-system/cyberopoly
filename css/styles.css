@@ -378,6 +378,15 @@ body {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* Space name for left/right needs to wrap and shrink */
+.space.left .space-name,
+.space.right .space-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.6em;
+    line-height: 1.1;
+}
+
 .space-price {
     font-size: 0.65em;
     color: var(--primary-color);
@@ -437,6 +446,15 @@ body {
     margin-top: 2px;
 }
 
+/* Owner indicator for left/right spaces */
+.space.left .space-owner-indicator,
+.space.right .space-owner-indicator {
+    width: 5px;
+    height: 100%;
+    margin-top: 0;
+    margin-left: 2px;
+}
+
 /* Bottom and Top row spaces */
 .space.bottom, .space.top {
     width: 60px;
@@ -448,12 +466,16 @@ body {
     width: 90px;
     height: 60px;
     flex-direction: row;
+    justify-content: flex-start;
+    gap: 3px;
 }
 
 .space.left .space-color-bar,
 .space.right .space-color-bar {
-    width: 15px;
+    width: 22px;
     height: 100%;
+    flex-shrink: 0;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.3), inset 1px 0 2px rgba(255, 255, 255, 0.2);
 }
 
 /* Corner spaces */
