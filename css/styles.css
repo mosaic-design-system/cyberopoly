@@ -290,11 +290,13 @@ body {
     pointer-events: none;
     z-index: 500;
     display: none;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 #dice-box canvas {
     width: 100% !important;
     height: 100% !important;
+    display: block !important;
 }
 
 #sidebar {
