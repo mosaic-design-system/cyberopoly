@@ -277,7 +277,7 @@ body {
 #board-container {
     flex: 1;
     position: relative;
-    min-height: 700px;
+    min-height: 900px;
 }
 
 #sidebar {
@@ -289,8 +289,8 @@ body {
 
 /* Board */
 #board {
-    width: 700px;
-    height: 700px;
+    width: 900px;
+    height: 900px;
     margin: 0 auto;
     position: relative;
     background: var(--bg-medium);
@@ -370,7 +370,7 @@ body {
 }
 
 .space-name {
-    font-size: 0.7em;
+    font-size: 0.8em;
     text-align: center;
     font-weight: bold;
     line-height: 1.2;
@@ -383,16 +383,16 @@ body {
 .space.right .space-name {
     flex: 1;
     min-width: 0;
-    font-size: 0.6em;
+    font-size: 0.7em;
     line-height: 1.1;
 }
 
 .space-price {
-    font-size: 0.65em;
+    font-size: 0.75em;
     color: var(--primary-color);
     font-weight: bold;
     background: rgba(0, 0, 0, 0.3);
-    padding: 2px 4px;
+    padding: 3px 5px;
     border-radius: 3px;
 }
 
@@ -434,7 +434,7 @@ body {
 
 .space-color-bar {
     width: 100%;
-    height: 18px;
+    height: 23px;
     border-radius: 3px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.4);
@@ -457,14 +457,14 @@ body {
 
 /* Bottom and Top row spaces */
 .space.bottom, .space.top {
-    width: 60px;
-    height: 90px;
+    width: 77px;
+    height: 115px;
 }
 
 /* Left and Right column spaces */
 .space.left, .space.right {
-    width: 90px;
-    height: 60px;
+    width: 115px;
+    height: 77px;
     flex-direction: row;
     justify-content: flex-start;
     gap: 3px;
@@ -472,7 +472,7 @@ body {
 
 .space.left .space-color-bar,
 .space.right .space-color-bar {
-    width: 22px;
+    width: 28px;
     height: 100%;
     flex-shrink: 0;
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.3), inset 1px 0 2px rgba(255, 255, 255, 0.2);
@@ -480,8 +480,8 @@ body {
 
 /* Corner spaces */
 .space.corner {
-    width: 90px;
-    height: 90px;
+    width: 115px;
+    height: 115px;
 }
 
 /* Property Group Colors */
@@ -851,7 +851,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     #game-screen .game-layout {
         flex-direction: column;
     }
@@ -861,12 +861,38 @@ body {
     }
 
     #board {
-        width: 600px;
-        height: 600px;
+        width: 750px;
+        height: 750px;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    #board {
+        width: 600px;
+        height: 600px;
+    }
+
+    .space.bottom, .space.top {
+        width: 51px;
+        height: 77px;
+    }
+
+    .space.left, .space.right {
+        width: 77px;
+        height: 51px;
+    }
+
+    .space.corner {
+        width: 77px;
+        height: 77px;
+    }
+
+    .space-name {
+        font-size: 0.6em;
+    }
+}
+
+@media (max-width: 650px) {
     #board {
         width: 100%;
         max-width: 500px;
@@ -874,18 +900,18 @@ body {
     }
 
     .space.bottom, .space.top {
-        width: 45px;
-        height: 70px;
+        width: 43px;
+        height: 64px;
     }
 
     .space.left, .space.right {
-        width: 70px;
-        height: 45px;
+        width: 64px;
+        height: 43px;
     }
 
     .space.corner {
-        width: 70px;
-        height: 70px;
+        width: 64px;
+        height: 64px;
     }
 
     .space-name {

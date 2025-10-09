@@ -183,9 +183,9 @@ class UIManager {
 
         // Calculate positions for each space
         const spaces = GameData.spaces;
-        const boardSize = 700; // pixels
-        const cornerSize = 90;
-        const sideSize = 60;
+        const boardSize = 900; // pixels
+        const cornerSize = 115;
+        const sideSize = 77;
         const sideSpaces = 9; // Spaces per side (excluding corners)
 
         spaces.forEach((space, index) => {
