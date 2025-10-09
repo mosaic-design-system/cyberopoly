@@ -192,6 +192,7 @@ class UIManager {
             const spaceElement = document.createElement('div');
             spaceElement.className = 'space';
             spaceElement.dataset.spaceId = space.id;
+            spaceElement.dataset.spaceType = space.type;
 
             // Position calculation
             let left, top, width, height, additionalClass;

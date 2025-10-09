@@ -318,22 +318,117 @@ body {
     z-index: 10;
 }
 
+/* Space type styling */
+.space[data-space-type="property"] {
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.space[data-space-type="incident"] {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #2a1a4a 100%);
+    border: 2px solid var(--warning-color);
+}
+
+.space[data-space-type="utility"] {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #1a3a2a 100%);
+    border: 2px solid var(--success-color);
+}
+
+.space[data-space-type="tax"] {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #3a1a1a 100%);
+    border: 2px solid var(--danger-color);
+}
+
+.space[data-space-type="phishing"],
+.space[data-space-type="audit"] {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #2a2a1a 100%);
+    border: 2px solid var(--warning-color);
+    border-style: dashed;
+}
+
+.space[data-space-type="go"] {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+.space[data-space-type="jail"] {
+    background: linear-gradient(135deg, #30363d 0%, #21262d 100%);
+    border: 3px solid var(--text-secondary);
+}
+
+.space[data-space-type="parking"] {
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+    border: 3px solid var(--primary-color);
+}
+
+.space[data-space-type="go-to-jail"] {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #8b0000 100%);
+    border: 3px solid var(--danger-color);
+    box-shadow: 0 0 20px rgba(255, 0, 64, 0.5);
+}
+
 .space-name {
     font-size: 0.7em;
     text-align: center;
     font-weight: bold;
     line-height: 1.2;
+    color: var(--text-primary);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .space-price {
     font-size: 0.65em;
     color: var(--primary-color);
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Enhanced corner space styling */
+.space.corner .space-name {
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* Special space type indicators */
+.space[data-space-type="incident"] .space-name::before {
+    content: '⚡ ';
+}
+
+.space[data-space-type="utility"] .space-name::before {
+    content: '🎓 ';
+}
+
+.space[data-space-type="tax"] .space-name::before {
+    content: '💸 ';
+}
+
+.space[data-space-type="phishing"] .space-name::before,
+.space[data-space-type="audit"] .space-name::before {
+    content: '📧 ';
+}
+
+.space[data-space-type="go"] .space-name {
+    font-size: 1.2em;
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.space[data-space-type="go-to-jail"] .space-name {
+    font-size: 0.85em;
+    color: white;
+    font-weight: bold;
 }
 
 .space-color-bar {
     width: 100%;
-    height: 15px;
+    height: 18px;
     border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.4);
 }
 
 .space-owner-indicator {
@@ -368,14 +463,30 @@ body {
 }
 
 /* Property Group Colors */
-.color-brown { background-color: #8b4513; }
-.color-lightblue { background-color: #87ceeb; }
-.color-pink { background-color: #ff1493; }
-.color-orange { background-color: #ff8c00; }
-.color-red { background-color: #dc143c; }
-.color-yellow { background-color: #ffd700; }
-.color-green { background-color: #32cd32; }
-.color-darkblue { background-color: #00008b; }
+.color-brown {
+    background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+}
+.color-lightblue {
+    background: linear-gradient(135deg, #87ceeb 0%, #4fc3f7 100%);
+}
+.color-pink {
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+}
+.color-orange {
+    background: linear-gradient(135deg, #ff8c00 0%, #ffa500 100%);
+}
+.color-red {
+    background: linear-gradient(135deg, #dc143c 0%, #ff4757 100%);
+}
+.color-yellow {
+    background: linear-gradient(135deg, #ffd700 0%, #ffeb3b 100%);
+}
+.color-green {
+    background: linear-gradient(135deg, #32cd32 0%, #2ed573 100%);
+}
+.color-darkblue {
+    background: linear-gradient(135deg, #00008b 0%, #0066cc 100%);
+}
 
 /* Player Pieces */
 .player-piece {
