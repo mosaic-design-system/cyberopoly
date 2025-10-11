@@ -530,8 +530,16 @@ class Game {
         const player = this.getCurrentPlayer();
 
         if (!player.isAI || this.gameState !== 'playing') {
+            console.log('handleAITurn exiting early:', { isAI: player?.isAI, gameState: this.gameState });
             return;
         }
+
+        // Prevent concurrent AI turns for the same player
+        if (player._aiTurnInProgress) {
+            console.warn('AI turn already in progress for', player.name);
+            return;
+        }
+        player._aiTurnInProgress = true;
 
         // Show AI thinking indicator
         if (this.ui) {
@@ -546,6 +554,10 @@ class Game {
             this.log(`${player.name} (AI) is thinking...`);
             const decision = await apiClient.getAIDecision(gameState, player, player.aiStrategy);
 
+            if (!decision || !decision.action) {
+                throw new Error('Invalid AI decision received');
+            }
+
             // Show AI commentary bubble if available
             if (decision.commentary && this.ui) {
                 this.ui.showAICommentary(player.name, decision.commentary);
@@ -556,10 +568,17 @@ class Game {
 
         } catch (error) {
             console.error('Error in AI turn:', error);
-            this.log(`${player.name} (AI) encountered an error, ending turn`);
+            this.log(`${player.name} (AI) encountered an error, ending turn`, true);
+
+            // Force end turn to prevent getting stuck
             this.turnPhase = 'end';
-            this.endTurn();
+            setTimeout(() => {
+                if (this.getCurrentPlayer().id === player.id) {
+                    this.endTurn();
+                }
+            }, 500);
         } finally {
+            player._aiTurnInProgress = false;
             if (this.ui) {
                 this.ui.showAIThinking(false);
             }
@@ -614,11 +633,20 @@ class Game {
             case 'buy_property':
                 this.log(`${player.name} (AI) decides to buy the property`, true);
                 await new Promise(resolve => setTimeout(resolve, 500));
-                this.buyProperty();
-                // After buying, AI needs to make next decision (should be end_turn)
+                const buySuccess = this.buyProperty();
+
+                // After buying (or attempting to buy), AI needs to make next decision
                 setTimeout(() => {
-                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                    const currentPlayer = this.getCurrentPlayer();
+                    if (currentPlayer && currentPlayer.isAI && currentPlayer.id === player.id && this.gameState === 'playing') {
                         this.handleAITurn();
+                    } else {
+                        console.warn('AI turn not continuing after buy_property:', {
+                            currentPlayerId: currentPlayer?.id,
+                            originalPlayerId: player.id,
+                            isAI: currentPlayer?.isAI,
+                            gameState: this.gameState
+                        });
                     }
                 }, 1000);
                 break;
@@ -626,10 +654,12 @@ class Game {
             case 'decline_property':
                 this.log(`${player.name} (AI) declines to buy the property`);
                 await new Promise(resolve => setTimeout(resolve, 500));
-                // After declining, AI needs to make next decision (should be end_turn)
+                // After declining, automatically move to end phase and end turn
+                this.turnPhase = 'end';
                 setTimeout(() => {
-                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
-                        this.handleAITurn();
+                    const currentPlayer = this.getCurrentPlayer();
+                    if (currentPlayer && currentPlayer.isAI && currentPlayer.id === player.id && this.gameState === 'playing') {
+                        this.endTurn();  // End turn directly instead of re-analyzing
                     }
                 }, 800);
                 break;
@@ -643,7 +673,8 @@ class Game {
                 }
                 // AI continues after upgrading
                 setTimeout(() => {
-                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                    const currentPlayer = this.getCurrentPlayer();
+                    if (currentPlayer && currentPlayer.isAI && currentPlayer.id === player.id && this.gameState === 'playing') {
                         this.handleAITurn();
                     }
                 }, 1000);
@@ -658,7 +689,8 @@ class Game {
                 }
                 // AI continues after mortgaging
                 setTimeout(() => {
-                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                    const currentPlayer = this.getCurrentPlayer();
+                    if (currentPlayer && currentPlayer.isAI && currentPlayer.id === player.id && this.gameState === 'playing') {
                         this.handleAITurn();
                     }
                 }, 1000);
@@ -670,7 +702,8 @@ class Game {
                 this.payJailFee();
                 // AI continues after paying
                 setTimeout(() => {
-                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                    const currentPlayer = this.getCurrentPlayer();
+                    if (currentPlayer && currentPlayer.isAI && currentPlayer.id === player.id && this.gameState === 'playing') {
                         this.handleAITurn();
                     }
                 }, 1000);
