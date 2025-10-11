@@ -2,6 +2,8 @@
 
 This guide will help you set up and run CyberOpoly with autonomous AI players powered by Claude Sonnet 4.5.
 
+> **⚠️ IMPORTANT**: AI players require a backend server to be running. The game will work fine with human players only (no setup needed), but to enable AI opponents you **must** complete this setup and keep the backend server running while playing.
+
 ## 🎯 Quick Start (5 minutes)
 
 ### Step 1: Get Your Anthropic API Key

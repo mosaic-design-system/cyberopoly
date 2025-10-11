@@ -78,19 +78,45 @@ CyberOpoly features sophisticated AI opponents powered by Claude Sonnet 4.5! AI 
 ### Prerequisites
 
 - A modern web browser (Chrome, Firefox, Safari, Edge)
-- No server or build process required!
+- **For AI Players**: Node.js 16+ and an Anthropic API key (see AI Setup below)
 
-### Installation
+### Quick Start (Human Players Only)
 
 1. Clone or download this repository
 2. Open `index.html` in your web browser
 3. That's it! The game runs entirely in your browser.
 
 ```bash
-# If you want to run a local server (optional):
+# Optional: Run a local server
 python3 -m http.server 8000
 # Then visit http://localhost:8000
 ```
+
+### Quick Start (With AI Players)
+
+**⚠️ Important: AI players require a backend server to be running!**
+
+1. **Get an Anthropic API key** from [console.anthropic.com](https://console.anthropic.com)
+2. **Set up the backend**:
+   ```bash
+   cd server
+   npm install
+   cp .env.example .env
+   # Edit .env and add your ANTHROPIC_API_KEY
+   ```
+3. **Start both servers**:
+   ```bash
+   # Terminal 1: Start the game server
+   python3 -m http.server 8000
+
+   # Terminal 2: Start the AI backend
+   cd server
+   npm start
+   ```
+4. **Open the game**: Visit `http://localhost:8000`
+5. **Enable AI players**: Check the "🤖 AI Player" checkbox during setup
+
+**Note**: Without the backend server running, AI players will not work. The game will function normally for human-only play.
 
 ## 📖 How to Play
 

@@ -8,10 +8,23 @@ Simply open `index.html` in any modern web browser:
 - Right-click → Open With → Your Browser, or
 - Drag and drop into your browser window
 
+**Optional - For local server:**
+```bash
+python3 -m http.server 8000
+# Then visit http://localhost:8000
+```
+
 ### 2. Set Up Players
-- Choose number of players (1-4)
-- Enter player names
+- Choose number of players (1-6)
+- Enter player names for each player
+- Choose player tokens (12 unique emojis available)
+- **Optional**: Enable AI players
+  - Check "🤖 AI Player" for any player
+  - Select AI strategy (Aggressive/Balanced/Defensive)
+  - **⚠️ Requires backend server** - see `AI_SETUP.md` for setup
 - Click "Start Game"
+
+> **Note**: Without the backend server, AI players won't work. The game functions normally with human players only - no setup required!
 
 ### 3. Play Your Turn
 1. **Click "Roll Dice"**
