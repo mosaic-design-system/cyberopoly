@@ -6,6 +6,44 @@ import { getAIDecision, testAIConnection } from './ai-agent.js';
 // Load environment variables
 dotenv.config();
 
+// Validate critical environment variables
+const validateEnvironment = () => {
+  const errors = [];
+
+  // Check for API key (required for AI functionality)
+  if (!process.env.ANTHROPIC_API_KEY) {
+    errors.push('ANTHROPIC_API_KEY is not set');
+  } else if (!process.env.ANTHROPIC_API_KEY.startsWith('sk-ant-')) {
+    errors.push('ANTHROPIC_API_KEY appears to be invalid (should start with "sk-ant-")');
+  }
+
+  // Warn if port is in use range that might conflict
+  const port = parseInt(process.env.PORT || '3001');
+  if (isNaN(port) || port < 1024 || port > 65535) {
+    errors.push(`PORT must be a valid number between 1024 and 65535 (current: ${process.env.PORT})`);
+  }
+
+  return errors;
+};
+
+// Run validation
+const envErrors = validateEnvironment();
+if (envErrors.length > 0) {
+  console.error('\n❌ Environment Configuration Errors:');
+  envErrors.forEach(error => console.error(`   - ${error}`));
+  console.error('\n💡 Please check your .env file in the server directory');
+  console.error('   Example: ANTHROPIC_API_KEY=sk-ant-your-key-here\n');
+
+  // Exit with error code if API key is completely missing
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('⚠️  Server cannot start without ANTHROPIC_API_KEY');
+    console.error('   AI players will not work!\n');
+    process.exit(1);
+  } else {
+    console.warn('⚠️  Server starting with configuration warnings...\n');
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -38,11 +76,44 @@ app.post('/api/ai-decision', async (req, res) => {
   try {
     const { gameState, player, strategy } = req.body;
 
-    // Validate request
+    // Validate request body exists
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({
+        error: 'Invalid request',
+        message: 'Request body must be a valid JSON object'
+      });
+    }
+
+    // Validate required fields
     if (!gameState || !player) {
       return res.status(400).json({
         error: 'Missing required fields',
         message: 'gameState and player are required'
+      });
+    }
+
+    // Validate gameState structure
+    if (typeof gameState !== 'object' || !Array.isArray(gameState.players)) {
+      return res.status(400).json({
+        error: 'Invalid gameState',
+        message: 'gameState must be an object with a players array'
+      });
+    }
+
+    // Validate player structure
+    if (typeof player !== 'object' || !player.name || typeof player.money !== 'number') {
+      return res.status(400).json({
+        error: 'Invalid player',
+        message: 'player must be an object with name and money properties'
+      });
+    }
+
+    // Validate strategy if provided
+    const validStrategies = ['aggressive', 'balanced', 'defensive'];
+    if (strategy && !validStrategies.includes(strategy)) {
+      return res.status(400).json({
+        error: 'Invalid strategy',
+        message: `strategy must be one of: ${validStrategies.join(', ')}`
       });
     }
 
