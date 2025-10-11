@@ -31,12 +31,23 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+body:has(#game-screen.active) {
+    overflow: hidden;
+    height: 100vh;
 }
 
 #game-container {
     max-width: 1600px;
     margin: 0 auto;
     padding: 10px;
+}
+
+#game-container:has(#game-screen.active) {
+    padding: 0;
+    max-width: 100%;
 }
 
 /* Game Screen Header - only shown during gameplay */
@@ -267,43 +278,67 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 #game-screen .game-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
     gap: 15px;
+    height: 100%;
+    align-items: start;
+    overflow: hidden;
+}
+
+#left-sidebar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+#left-sidebar #game-log-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+#left-sidebar #game-log {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    font-size: 0.85em;
 }
 
 #board-container {
-    flex: 1;
     position: relative;
-    min-height: 900px;
-}
-
-/* 3D Dice Container */
-#dice-box {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
     height: 100%;
-    pointer-events: none;
-    z-index: 500;
-    display: none;
-    background: rgba(0, 0, 0, 0.5);
+    min-width: 0;
+    min-height: 0;
 }
 
-#dice-box canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block !important;
-}
-
-#sidebar {
-    width: 320px;
+#right-sidebar {
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
+    min-height: 0;
+    min-width: 0;
 }
 
 /* Board */
@@ -315,6 +350,27 @@ body {
     background: var(--bg-medium);
     border: 3px solid var(--primary-color);
     box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+    flex-shrink: 0;
+    transform-origin: center center;
+}
+
+/* Scale board to fit viewport */
+@media (max-height: 950px) {
+    #board {
+        transform: scale(0.8);
+    }
+}
+
+@media (max-height: 800px) {
+    #board {
+        transform: scale(0.7);
+    }
+}
+
+@media (max-height: 700px) {
+    #board {
+        transform: scale(0.6);
+    }
 }
 
 /* Board Spaces */
@@ -688,31 +744,11 @@ body {
 }
 
 #game-log-panel h3 {
-    cursor: pointer;
     user-select: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-#game-log-panel h3:hover {
-    color: var(--success-color);
-}
-
-#game-log-panel h3::after {
-    content: '▼';
-    font-size: 0.8em;
-    transition: transform 0.3s ease;
-}
-
-#game-log-panel.collapsed h3::after {
-    transform: rotate(-90deg);
-}
-
-#game-log {
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 0.85em;
+    flex-shrink: 0;
 }
 
 .log-entry {
@@ -872,11 +908,22 @@ body {
 /* Responsive Design */
 @media (max-width: 1400px) {
     #game-screen .game-layout {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
     }
 
-    #sidebar {
-        width: 100%;
+    #left-sidebar {
+        order: 3;
+        height: 200px;
+    }
+
+    #board-container {
+        order: 1;
+    }
+
+    #right-sidebar {
+        order: 2;
+        height: auto;
     }
 
     #board {
@@ -936,6 +983,84 @@ body {
     .space-name {
         font-size: 0.5em;
     }
+}
+
+/* AI Commentary Bubbles */
+#ai-commentary-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.ai-commentary-bubble {
+    background: linear-gradient(135deg, rgba(0, 255, 65, 0.95) 0%, rgba(0, 200, 50, 0.95) 100%);
+    color: var(--secondary-color);
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 255, 65, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.95em;
+    line-height: 1.4;
+    animation: slideInRight 0.4s ease-out, fadeOut 0.5s ease-in 4.5s forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-commentary-bubble::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.ai-commentary-bubble .player-name {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.ai-commentary-bubble .commentary-text {
+    display: block;
+    font-weight: 500;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(450px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 /* Scrollbar Styling */

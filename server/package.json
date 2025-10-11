@@ -1,0 +1,24 @@
+{
+  "name": "cyberopoly-server",
+  "version": "1.0.0",
+  "description": "Backend API for CyberOpoly AI agents",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "cyberopoly",
+    "ai",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  }
+}

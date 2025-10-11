@@ -31,6 +31,26 @@ CyberOpoly is a browser-based board game that combines classic Monopoly gameplay
 - **British Currency**: All transactions in £ (pounds)
 - **Security Upgrades**: Instead of houses/hotels, upgrade security levels on properties
 - **Save/Load**: Game state can be saved to localStorage
+- **🤖 AI Players**: Autonomous AI opponents powered by Claude Sonnet 4.5 (optional backend required)
+
+## 🤖 AI Players (NEW!)
+
+CyberOpoly now supports autonomous AI opponents powered by Claude Sonnet 4.5! AI players:
+
+- Make strategic decisions based on game state
+- Use different playing styles (Aggressive, Balanced, Defensive)
+- Play completely autonomously - no human input needed
+- Learn and adapt to the game situation
+- Show their reasoning in the game log
+
+**Quick Setup:**
+1. Get an Anthropic API key from [console.anthropic.com](https://console.anthropic.com)
+2. Follow the setup in `AI_SETUP.md`
+3. Start the backend server
+4. Check "🤖 AI Player" in game setup
+5. Watch AI players compete!
+
+**More Details:** See `AI_SETUP.md` for complete setup instructions.
 
 ## 🚀 Getting Started
 
@@ -143,11 +163,19 @@ cyberopoly/
 │   ├── player.js          # Player class
 │   ├── board.js           # Board management
 │   ├── game.js            # Core game logic
-│   └── ui.js              # UI management and rendering
+│   ├── ui.js              # UI management and rendering
+│   └── api-client.js      # AI backend API client
+├── server/                 # AI Backend (optional)
+│   ├── index.js           # Express server
+│   ├── ai-agent.js        # Anthropic SDK & AI logic
+│   ├── package.json       # Backend dependencies
+│   └── README.md          # Backend documentation
 ├── assets/
 │   ├── images/            # (Future: board graphics, icons)
 │   └── sounds/            # (Future: sound effects)
-└── README.md
+├── AI_SETUP.md            # AI players setup guide
+├── DEPLOYMENT.md          # Production deployment guide
+└── README.md              # This file
 ```
 
 ## 🎓 Educational Goals
@@ -164,6 +192,7 @@ CyberOpoly is designed to:
 
 Potential features for future versions:
 
+- [x] **AI opponents for single-player** ✓ Now available!
 - [ ] Network multiplayer (using WebSockets)
 - [ ] Trading between players
 - [ ] Auction system for unowned properties
@@ -172,8 +201,7 @@ Potential features for future versions:
 - [ ] Animations for movement and actions
 - [ ] Mobile-responsive design improvements
 - [ ] Game statistics and achievements
-- [ ] AI opponents for single-player
-- [ ] Difficulty levels
+- [ ] Difficulty levels / AI strategy customization
 - [ ] Custom house rules
 - [ ] Quiz mode for additional learning
 - [ ] Integration with real threat intelligence feeds

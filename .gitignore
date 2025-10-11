@@ -34,12 +34,16 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Node (if you add build tools later)
+# Node
 node_modules/
 npm-debug.log
 yarn-error.log
 package-lock.json
 yarn.lock
+
+# Environment variables
+.env
+.env.local
 
 # Logs
 logs/

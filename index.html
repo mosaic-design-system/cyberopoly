@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberOpoly - Cybersecurity Monopoly Game</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- dddice SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/dddice-js@latest/dist/dddice.min.js"></script>
 </head>
 <body>
     <div id="game-container">
@@ -21,12 +19,14 @@
                     </div>
                     <h2>Game Setup</h2>
                     <div class="setup-form">
-                        <label for="player-count">Number of Players (1-4):</label>
+                        <label for="player-count">Number of Players (1-6):</label>
                         <select id="player-count">
                             <option value="1">1 Player</option>
                             <option value="2" selected>2 Players</option>
                             <option value="3">3 Players</option>
                             <option value="4">4 Players</option>
+                            <option value="5">5 Players</option>
+                            <option value="6">6 Players</option>
                         </select>
 
                         <div id="player-names-container">
@@ -42,10 +42,16 @@
             <div id="game-screen" class="screen">
 
                 <div class="game-layout">
-                    <div id="board-container">
-                        <!-- 3D Dice Canvas -->
-                        <div id="dice-box"></div>
+                    <!-- Left Sidebar: Game Log -->
+                    <div id="left-sidebar">
+                        <div id="game-log-panel" class="panel">
+                            <h3>Game Log</h3>
+                            <div id="game-log"></div>
+                        </div>
+                    </div>
 
+                    <!-- Center: Board -->
+                    <div id="board-container">
                         <div id="board">
                             <!-- Board spaces will be generated dynamically -->
                         </div>
@@ -62,7 +68,8 @@
                         </div>
                     </div>
 
-                    <div id="sidebar">
+                    <!-- Right Sidebar: Players & Actions -->
+                    <div id="right-sidebar">
                         <div id="current-player-info" class="panel">
                             <h3>Current Turn</h3>
                             <div id="player-turn-display"></div>
@@ -83,11 +90,6 @@
                                 <button id="end-turn-btn" class="btn" disabled>End Turn</button>
                             </div>
                         </div>
-
-                        <div id="game-log-panel" class="panel">
-                            <h3>Game Log</h3>
-                            <div id="game-log"></div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -100,6 +102,9 @@
                 <div id="modal-body"></div>
             </div>
         </div>
+
+        <!-- AI Commentary Container -->
+        <div id="ai-commentary-container"></div>
     </div>
 
     <!-- Load JavaScript modules -->
@@ -107,7 +112,7 @@
     <script src="js/player.js"></script>
     <script src="js/board.js"></script>
     <script src="js/cards.js"></script>
-    <script src="js/dice3d.js"></script>
+    <script src="js/api-client.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
 </body>

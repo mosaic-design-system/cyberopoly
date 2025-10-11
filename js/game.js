@@ -17,7 +17,14 @@ class Game {
     startGame(playerData) {
         this.players = [];
         playerData.forEach((data, index) => {
-            const player = new Player(data.name, index, PLAYER_COLORS[index], data.token);
+            const player = new Player(
+                data.name,
+                index,
+                PLAYER_COLORS[index],
+                data.token,
+                data.isAI || false,
+                data.aiStrategy || 'balanced'
+            );
             this.players.push(player);
         });
 
@@ -28,6 +35,11 @@ class Game {
 
         this.log(`Game started with ${this.players.length} players!`, true);
         this.log(`${this.getCurrentPlayer().name}'s turn`, true);
+
+        // Start AI turn if first player is AI
+        if (this.getCurrentPlayer().isAI) {
+            this.handleAITurn();
+        }
     }
 
     // Get current player
@@ -36,15 +48,14 @@ class Game {
     }
 
     // Roll dice
-    rollDice(forcedDie1 = null, forcedDie2 = null) {
+    rollDice() {
         if (this.turnPhase !== 'roll') {
             this.log("You must end your turn first!");
             return null;
         }
 
-        // Use forced values from 3D dice if provided, otherwise generate random
-        const die1 = forcedDie1 || Math.floor(Math.random() * 6) + 1;
-        const die2 = forcedDie2 || Math.floor(Math.random() * 6) + 1;
+        const die1 = Math.floor(Math.random() * 6) + 1;
+        const die2 = Math.floor(Math.random() * 6) + 1;
         this.lastDiceRoll = [die1, die2];
 
         const total = die1 + die2;
@@ -153,7 +164,17 @@ class Game {
 
         switch(space.type) {
             case 'go':
-                // Already handled in movePlayer
+                // Already handled in movePlayer (bonus collected on passing)
+                this.log(`${player.name} landed on ${space.name}`);
+
+                // If AI player, continue turn
+                if (player.isAI) {
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 800);
+                }
                 break;
 
             case 'property':
@@ -161,9 +182,21 @@ class Game {
             case 'utility':
                 if (!space.owner) {
                     this.log(`${space.name} is available for £${space.price}`);
-                    // Show purchase modal
-                    if (this.ui) {
-                        this.ui.showPropertyPurchaseModal(space, player);
+
+                    // Handle differently for AI vs human
+                    if (player.isAI) {
+                        // AI will decide via its normal decision loop
+                        // Schedule next AI turn to make buy/decline decision
+                        setTimeout(() => {
+                            if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                                this.handleAITurn();
+                            }
+                        }, 1000);
+                    } else {
+                        // Show purchase modal for human players
+                        if (this.ui) {
+                            this.ui.showPropertyPurchaseModal(space, player);
+                        }
                     }
                 } else if (space.owner !== player.id) {
                     const rent = this.board.calculateRent(space.id, this.lastDiceRoll[0] + this.lastDiceRoll[1]);
@@ -177,51 +210,141 @@ class Game {
                             this.handleBankruptcy(player, this.players[space.owner]);
                         }
                     }
+
+                    // If AI player, continue their turn
+                    if (player.isAI) {
+                        setTimeout(() => {
+                            if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                                this.handleAITurn();
+                            }
+                        }, 1000);
+                    }
                 }
                 break;
 
             case 'phishing':
                 this.log(`${player.name} drew a Phishing Email card`, true);
                 const phishingCard = this.cardManager.drawPhishingCard();
-                if (this.ui) {
-                    this.ui.showCard(phishingCard, 'Phishing Email');
+
+                if (player.isAI) {
+                    // For AI: Log card and execute immediately
+                    this.log(`Card: ${phishingCard.title}`);
+                    this.cardManager.executeCard(phishingCard, this, player);
+
+                    // Continue AI turn
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                } else {
+                    // For human: Show card modal
+                    if (this.ui) {
+                        this.ui.showCard(phishingCard, 'Phishing Email');
+                    }
+                    this.cardManager.executeCard(phishingCard, this, player);
                 }
-                this.cardManager.executeCard(phishingCard, this, player);
                 break;
 
             case 'audit':
                 this.log(`${player.name} drew a Security Audit card`, true);
                 const auditCard = this.cardManager.drawAuditCard();
-                if (this.ui) {
-                    this.ui.showCard(auditCard, 'Security Audit');
+
+                if (player.isAI) {
+                    // For AI: Log card and execute immediately
+                    this.log(`Card: ${auditCard.title}`);
+                    this.cardManager.executeCard(auditCard, this, player);
+
+                    // Continue AI turn
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                } else {
+                    // For human: Show card modal
+                    if (this.ui) {
+                        this.ui.showCard(auditCard, 'Security Audit');
+                    }
+                    this.cardManager.executeCard(auditCard, this, player);
                 }
-                this.cardManager.executeCard(auditCard, this, player);
                 break;
 
             case 'tax':
-                if (this.ui) {
-                    this.ui.showTaxModal(space, player);
-                } else {
+                if (player.isAI) {
+                    // AI pays automatically
                     player.money -= space.amount;
-                    this.log(`${player.name} paid £${space.amount} in ${space.name}`, true);
+                    this.log(`${player.name} (AI) paid £${space.amount} in ${space.name}`, true);
+
+                    // Check for bankruptcy
+                    if (player.money < 0) {
+                        this.handleBankruptcy(player, null);
+                    }
+
+                    // Continue AI turn
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                } else {
+                    // Show modal for human players
+                    if (this.ui) {
+                        this.ui.showTaxModal(space, player);
+                    } else {
+                        player.money -= space.amount;
+                        this.log(`${player.name} paid £${space.amount} in ${space.name}`, true);
+                    }
                 }
                 break;
 
             case 'go-to-jail':
                 this.log(`${player.name} got hit with ransomware! Go to Quarantine!`, true);
-                if (this.ui) {
-                    this.ui.showGoToJailModal(space, player);
-                } else {
+
+                if (player.isAI) {
+                    // AI goes to jail automatically
                     player.sendToJail();
+
+                    // Continue AI turn (they'll handle jail on next turn)
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                } else {
+                    // Show modal for human players
+                    if (this.ui) {
+                        this.ui.showGoToJailModal(space, player);
+                    } else {
+                        player.sendToJail();
+                    }
                 }
                 break;
 
             case 'jail':
                 this.log(`${player.name} is just visiting Quarantine`);
+
+                // If AI player on visiting jail, continue turn
+                if (player.isAI) {
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 800);
+                }
                 break;
 
             case 'parking':
                 this.log(`${player.name} is at ${space.name}`);
+
+                // If AI player, continue turn
+                if (player.isAI) {
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 800);
+                }
                 break;
         }
 
@@ -255,7 +378,6 @@ class Game {
 
         if (this.ui) {
             this.ui.updateAll();
-            this.ui.showBuyButton(false);
         }
 
         return true;
@@ -306,6 +428,11 @@ class Game {
             this.log(`${player.name} gets another turn for rolling doubles!`);
             this.turnPhase = 'roll';
             if (this.ui) this.ui.updateAll();
+
+            // If current player is AI, continue their turn
+            if (player.isAI) {
+                setTimeout(() => this.handleAITurn(), 1500);
+            }
             return;
         }
 
@@ -327,6 +454,12 @@ class Game {
 
         // Check if game is over
         this.checkGameOver();
+
+        // Start AI turn if next player is AI
+        const nextPlayer = this.getCurrentPlayer();
+        if (nextPlayer.isAI && this.gameState === 'playing') {
+            setTimeout(() => this.handleAITurn(), 1500);
+        }
     }
 
     // Pay to leave jail
@@ -389,6 +522,169 @@ class Game {
             if (this.ui) {
                 this.ui.showGameOver(activePlayers[0]);
             }
+        }
+    }
+
+    // AI Turn Handling
+    async handleAITurn() {
+        const player = this.getCurrentPlayer();
+
+        if (!player.isAI || this.gameState !== 'playing') {
+            return;
+        }
+
+        // Show AI thinking indicator
+        if (this.ui) {
+            this.ui.showAIThinking(true);
+        }
+
+        try {
+            // Get game state for AI
+            const gameState = this.serializeGameState();
+
+            // Get AI decision
+            this.log(`${player.name} (AI) is thinking...`);
+            const decision = await apiClient.getAIDecision(gameState, player, player.aiStrategy);
+
+            // Show AI commentary bubble if available
+            if (decision.commentary && this.ui) {
+                this.ui.showAICommentary(player.name, decision.commentary);
+            }
+
+            // Execute the decision
+            await this.executeAIDecision(decision);
+
+        } catch (error) {
+            console.error('Error in AI turn:', error);
+            this.log(`${player.name} (AI) encountered an error, ending turn`);
+            this.turnPhase = 'end';
+            this.endTurn();
+        } finally {
+            if (this.ui) {
+                this.ui.showAIThinking(false);
+            }
+        }
+    }
+
+    // Serialize game state for AI
+    serializeGameState() {
+        return {
+            board: {
+                spaces: this.board.spaces
+            },
+            players: this.players.map(p => ({
+                id: p.id,
+                name: p.name,
+                money: p.money,
+                position: p.position,
+                properties: p.properties,
+                inJail: p.inJail,
+                jailTurns: p.jailTurns,
+                isBankrupt: p.isBankrupt
+            })),
+            currentPlayerIndex: this.currentPlayerIndex,
+            turnPhase: this.turnPhase,
+            lastDiceRoll: this.lastDiceRoll,
+            consecutiveDoubles: this.consecutiveDoubles
+        };
+    }
+
+    // Execute AI decision
+    async executeAIDecision(decision) {
+        const player = this.getCurrentPlayer();
+
+        // Add delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        switch (decision.action) {
+            case 'roll_dice':
+                if (this.turnPhase === 'roll') {
+                    this.log(`${player.name} (AI) rolls the dice`, true);
+                    if (this.ui) {
+                        this.ui.rollDice();
+                    } else {
+                        this.rollDice();
+                    }
+                } else {
+                    // Fallback if wrong phase
+                    this.endTurn();
+                }
+                break;
+
+            case 'buy_property':
+                this.log(`${player.name} (AI) decides to buy the property`, true);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                this.buyProperty();
+                // After buying, AI needs to make next decision (should be end_turn)
+                setTimeout(() => {
+                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                        this.handleAITurn();
+                    }
+                }, 1000);
+                break;
+
+            case 'decline_property':
+                this.log(`${player.name} (AI) declines to buy the property`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                // After declining, AI needs to make next decision (should be end_turn)
+                setTimeout(() => {
+                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                        this.handleAITurn();
+                    }
+                }, 800);
+                break;
+
+            case 'upgrade_property':
+                if (decision.params && decision.params.property_id !== undefined) {
+                    const space = this.board.getSpace(decision.params.property_id);
+                    this.log(`${player.name} (AI) upgrades ${space.name}`, true);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    this.upgradeProperty(decision.params.property_id);
+                }
+                // AI continues after upgrading
+                setTimeout(() => {
+                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                        this.handleAITurn();
+                    }
+                }, 1000);
+                break;
+
+            case 'mortgage_property':
+                if (decision.params && decision.params.property_id !== undefined) {
+                    const space = this.board.getSpace(decision.params.property_id);
+                    this.log(`${player.name} (AI) mortgages ${space.name}`, true);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    this.mortgageProperty(decision.params.property_id);
+                }
+                // AI continues after mortgaging
+                setTimeout(() => {
+                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                        this.handleAITurn();
+                    }
+                }, 1000);
+                break;
+
+            case 'pay_jail_fee':
+                this.log(`${player.name} (AI) pays to leave Quarantine`, true);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                this.payJailFee();
+                // AI continues after paying
+                setTimeout(() => {
+                    if (player.isAI && this.getCurrentPlayer().id === player.id) {
+                        this.handleAITurn();
+                    }
+                }, 1000);
+                break;
+
+            case 'end_turn':
+                this.log(`${player.name} (AI) ends their turn`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                this.endTurn();
+                break;
+
+            default:
+                console.warn(`Unknown AI action: ${decision.action}`);
+                this.endTurn();
         }
     }
 

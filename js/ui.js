@@ -104,6 +104,45 @@ class UIManager {
             input.dataset.playerId = i;
             input.className = 'player-name-field';
 
+            // AI checkbox
+            const aiControlsDiv = document.createElement('div');
+            aiControlsDiv.className = 'ai-controls';
+            aiControlsDiv.style.cssText = 'margin: 8px 0; display: flex; align-items: center; gap: 15px;';
+
+            const aiCheckboxLabel = document.createElement('label');
+            aiCheckboxLabel.style.cssText = 'display: flex; align-items: center; gap: 5px; cursor: pointer;';
+
+            const aiCheckbox = document.createElement('input');
+            aiCheckbox.type = 'checkbox';
+            aiCheckbox.className = 'ai-checkbox';
+            aiCheckbox.dataset.playerId = i;
+
+            const aiCheckboxText = document.createElement('span');
+            aiCheckboxText.textContent = '🤖 AI Player';
+            aiCheckboxText.style.fontSize = '0.9em';
+
+            aiCheckboxLabel.appendChild(aiCheckbox);
+            aiCheckboxLabel.appendChild(aiCheckboxText);
+
+            // AI Strategy selector
+            const strategySelect = document.createElement('select');
+            strategySelect.className = 'ai-strategy-select';
+            strategySelect.dataset.playerId = i;
+            strategySelect.style.cssText = 'display: none;';
+            strategySelect.innerHTML = `
+                <option value="balanced">Balanced</option>
+                <option value="aggressive">Aggressive</option>
+                <option value="defensive">Defensive</option>
+            `;
+
+            // Show/hide strategy selector based on AI checkbox
+            aiCheckbox.addEventListener('change', () => {
+                strategySelect.style.display = aiCheckbox.checked ? 'block' : 'none';
+            });
+
+            aiControlsDiv.appendChild(aiCheckboxLabel);
+            aiControlsDiv.appendChild(strategySelect);
+
             // Token selector label
             const tokenLabel = document.createElement('div');
             tokenLabel.className = 'token-label';
@@ -142,6 +181,7 @@ class UIManager {
 
             div.appendChild(label);
             div.appendChild(input);
+            div.appendChild(aiControlsDiv);
             div.appendChild(tokenLabel);
             div.appendChild(tokenSelector);
             this.playerNamesContainer.appendChild(div);
@@ -157,9 +197,19 @@ class UIManager {
             const tokenId = selectedToken ? selectedToken.dataset.tokenId : GameData.tokens[index].id;
             const token = GameData.tokens.find(t => t.id === tokenId) || GameData.tokens[index];
 
+            // Check if AI player
+            const aiCheckbox = row.querySelector('.ai-checkbox');
+            const isAI = aiCheckbox ? aiCheckbox.checked : false;
+
+            // Get AI strategy
+            const strategySelect = row.querySelector('.ai-strategy-select');
+            const aiStrategy = strategySelect ? strategySelect.value : 'balanced';
+
             return {
                 name: nameInput.value || nameInput.placeholder,
-                token: token
+                token: token,
+                isAI: isAI,
+                aiStrategy: aiStrategy
             };
         });
 
@@ -172,19 +222,6 @@ class UIManager {
         // Show game screen
         this.setupScreen.classList.remove('active');
         this.gameScreen.classList.add('active');
-
-        // Initialize 3D dice (with a small delay to ensure libraries are loaded)
-        setTimeout(async () => {
-            if (window.dice3D && !window.dice3D.isInitialized) {
-                console.log("Initializing 3D dice...");
-                const success = window.dice3D.initialize();
-                if (success) {
-                    console.log("3D dice ready!");
-                } else {
-                    console.log("3D dice initialization failed, will use 2D fallback");
-                }
-            }
-        }, 100);
 
         // Update UI
         this.updateAll();
@@ -435,6 +472,9 @@ class UIManager {
             const name = document.createElement('div');
             name.className = 'player-name';
             name.textContent = player.name;
+            if (player.isAI) {
+                name.textContent += ' 🤖';
+            }
             if (player.isBankrupt) {
                 name.textContent += ' (Bankrupt)';
                 name.style.textDecoration = 'line-through';
@@ -453,6 +493,9 @@ class UIManager {
             properties.textContent = `Properties: ${player.properties.length}`;
             if (player.inJail) {
                 properties.textContent += ' | IN QUARANTINE';
+            }
+            if (player.isAI) {
+                properties.textContent += ` | Strategy: ${player.aiStrategy}`;
             }
 
             card.appendChild(header);
@@ -479,8 +522,11 @@ class UIManager {
         const player = this.game.getCurrentPlayer();
         const space = this.game.board.getSpace(player.position);
 
+        // Disable all buttons if AI is playing
+        const isAITurn = player.isAI;
+
         // Roll dice button
-        this.rollDiceBtn.disabled = this.game.turnPhase !== 'roll';
+        this.rollDiceBtn.disabled = this.game.turnPhase !== 'roll' || isAITurn;
 
         // Buy property button - hidden since we use modal now
         this.buyPropertyBtn.style.display = 'none';
@@ -489,65 +535,67 @@ class UIManager {
         const hasUpgradableProperty = player.properties.some(propId =>
             this.game.board.canUpgrade(propId, player)
         );
-        this.upgradePropertyBtn.disabled = !hasUpgradableProperty;
+        this.upgradePropertyBtn.disabled = !hasUpgradableProperty || isAITurn;
 
         // Mortgage button
-        this.mortgageBtn.disabled = player.properties.length === 0;
+        this.mortgageBtn.disabled = player.properties.length === 0 || isAITurn;
 
         // Trade button (not implemented yet)
         this.tradeBtn.disabled = true;
 
         // End turn button
-        this.endTurnBtn.disabled = this.game.turnPhase === 'roll';
+        this.endTurnBtn.disabled = this.game.turnPhase === 'roll' || isAITurn;
     }
 
-    // Roll dice
-    async rollDice() {
-        // Check if 3D dice is available
-        if (window.dice3D && window.dice3D.isInitialized) {
-            // Use 3D dice
-            this.rollDiceBtn.disabled = true;
-            window.dice3D.show();
+    // Show/hide AI thinking indicator
+    showAIThinking(show) {
+        // Create thinking indicator if it doesn't exist
+        let thinkingIndicator = document.getElementById('ai-thinking-indicator');
 
-            try {
-                const diceResult = await window.dice3D.roll();
+        if (show && !thinkingIndicator) {
+            thinkingIndicator = document.createElement('div');
+            thinkingIndicator.id = 'ai-thinking-indicator';
+            thinkingIndicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 30px 50px;
+                border-radius: 15px;
+                font-size: 1.5em;
+                z-index: 10000;
+                text-align: center;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+                animation: pulse 1.5s ease-in-out infinite;
+            `;
+            thinkingIndicator.innerHTML = `
+                <div style="font-size: 3em; margin-bottom: 15px;">🤖</div>
+                <div>AI is thinking...</div>
+            `;
 
-                if (diceResult) {
-                    // Update the visual dice display
-                    this.dice1.textContent = diceResult.die1;
-                    this.dice2.textContent = diceResult.die2;
-
-                    // Pass the result to the game with specific values
-                    const gameResult = this.game.rollDice(diceResult.die1, diceResult.die2);
-
-                    // Wait a moment to show the dice
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    // Hide and clear the 3D dice
-                    window.dice3D.hide();
-
-                    // Small delay before clearing
-                    setTimeout(() => {
-                        window.dice3D.clear();
-                    }, 300);
-
-                    this.updateAll();
-                }
-            } catch (error) {
-                console.error("Error with 3D dice:", error);
-                // Fall back to regular dice roll
-                this.rollDiceFallback();
+            // Add pulse animation if not already added
+            if (!document.getElementById('ai-pulse-style')) {
+                const style = document.createElement('style');
+                style.id = 'ai-pulse-style';
+                style.textContent = `
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+                    }
+                `;
+                document.head.appendChild(style);
             }
 
-            this.rollDiceBtn.disabled = false;
-        } else {
-            // Fallback to simple dice animation
-            this.rollDiceFallback();
+            document.body.appendChild(thinkingIndicator);
+        } else if (!show && thinkingIndicator) {
+            thinkingIndicator.remove();
         }
     }
 
-    // Fallback dice roll (original animation)
-    rollDiceFallback() {
+    // Roll dice
+    rollDice() {
         this.dice1.classList.add('rolling');
         this.dice2.classList.add('rolling');
 
@@ -949,12 +997,39 @@ class UIManager {
         if (important) entry.classList.add('important');
         entry.textContent = message;
 
+        // Insert at top (newest messages at top)
         this.gameLog.insertBefore(entry, this.gameLog.firstChild);
 
-        // Keep only last 50 entries
+        // Keep only last 50 entries (remove from bottom)
         while (this.gameLog.children.length > 50) {
             this.gameLog.removeChild(this.gameLog.lastChild);
         }
+
+        // Keep scroll position at top to show latest message
+        this.gameLog.scrollTop = 0;
+    }
+
+    // Show AI commentary bubble
+    showAICommentary(playerName, commentary) {
+        const container = document.getElementById('ai-commentary-container');
+        if (!container || !commentary) return;
+
+        // Create bubble element
+        const bubble = document.createElement('div');
+        bubble.className = 'ai-commentary-bubble';
+
+        bubble.innerHTML = `
+            <span class="player-name">${playerName}</span>
+            <span class="commentary-text">${commentary}</span>
+        `;
+
+        // Add to container
+        container.appendChild(bubble);
+
+        // Remove after animation completes (5 seconds total)
+        setTimeout(() => {
+            bubble.remove();
+        }, 5000);
     }
 
     // Update all UI elements

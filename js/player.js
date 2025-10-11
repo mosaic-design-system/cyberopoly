@@ -1,7 +1,7 @@
 // Player Class
 
 class Player {
-    constructor(name, id, color, token) {
+    constructor(name, id, color, token, isAI = false, aiStrategy = 'balanced') {
         this.name = name;
         this.id = id;
         this.color = color;
@@ -14,6 +14,9 @@ class Player {
         this.jailFreeCards = 0;
         this.isBankrupt = false;
         this.doubleCount = 0;
+        // AI properties
+        this.isAI = isAI;
+        this.aiStrategy = aiStrategy; // 'aggressive', 'balanced', 'defensive'
     }
 
     // Money management
@@ -121,5 +124,7 @@ const PLAYER_COLORS = [
     '#ff4757', // Red
     '#1e90ff', // Blue
     '#2ed573', // Green
-    '#ffa502'  // Orange
+    '#ffa502', // Orange
+    '#a55eea', // Purple
+    '#fd79a8'  // Pink
 ];
