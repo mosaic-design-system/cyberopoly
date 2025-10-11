@@ -547,9 +547,8 @@ class UIManager {
         this.endTurnBtn.disabled = this.game.turnPhase === 'roll' || isAITurn;
     }
 
-    // Show/hide AI thinking indicator
+    // Show/hide AI thinking indicator (subtle corner badge)
     showAIThinking(show) {
-        // Create thinking indicator if it doesn't exist
         let thinkingIndicator = document.getElementById('ai-thinking-indicator');
 
         if (show && !thinkingIndicator) {
@@ -557,32 +556,50 @@ class UIManager {
             thinkingIndicator.id = 'ai-thinking-indicator';
             thinkingIndicator.style.cssText = `
                 position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+                bottom: 20px;
+                left: 20px;
                 background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 30px 50px;
-                border-radius: 15px;
-                font-size: 1.5em;
-                z-index: 10000;
-                text-align: center;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-                animation: pulse 1.5s ease-in-out infinite;
+                border: 2px solid var(--primary-color);
+                border-radius: 8px;
+                padding: 12px 20px;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 5px 20px rgba(0, 255, 65, 0.3);
+                animation: slideUp 0.3s ease-out;
             `;
             thinkingIndicator.innerHTML = `
-                <div style="font-size: 3em; margin-bottom: 15px;">🤖</div>
-                <div>AI is thinking...</div>
+                <div class="thinking-spinner" style="
+                    width: 20px;
+                    height: 20px;
+                    border: 3px solid var(--primary-color);
+                    border-top-color: transparent;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+                <div style="color: var(--primary-color); font-weight: 600; font-size: 0.95em;">
+                    AI is thinking...
+                </div>
             `;
 
-            // Add pulse animation if not already added
-            if (!document.getElementById('ai-pulse-style')) {
+            // Add animations if not already added
+            if (!document.getElementById('ai-thinking-style')) {
                 const style = document.createElement('style');
-                style.id = 'ai-pulse-style';
+                style.id = 'ai-thinking-style';
                 style.textContent = `
-                    @keyframes pulse {
-                        0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                        50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                    @keyframes slideUp {
+                        from {
+                            transform: translateY(20px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateY(0);
+                            opacity: 1;
+                        }
                     }
                 `;
                 document.head.appendChild(style);
@@ -590,7 +607,8 @@ class UIManager {
 
             document.body.appendChild(thinkingIndicator);
         } else if (!show && thinkingIndicator) {
-            thinkingIndicator.remove();
+            thinkingIndicator.style.animation = 'slideUp 0.3s ease-out reverse';
+            setTimeout(() => thinkingIndicator.remove(), 300);
         }
     }
 
@@ -1026,10 +1044,82 @@ class UIManager {
         // Add to container
         container.appendChild(bubble);
 
-        // Remove after animation completes (5 seconds total)
-        setTimeout(() => {
+        // Remove after animation completes (8 seconds total)
+        let removalTimer = setTimeout(() => {
             bubble.remove();
-        }, 5000);
+        }, 8000);
+
+        // Pause removal on hover
+        bubble.addEventListener('mouseenter', () => {
+            clearTimeout(removalTimer);
+            bubble.style.animationPlayState = 'paused';
+        });
+
+        // Resume removal on mouse leave
+        bubble.addEventListener('mouseleave', () => {
+            bubble.style.animationPlayState = 'running';
+            removalTimer = setTimeout(() => {
+                bubble.remove();
+            }, 2000); // Give 2 more seconds after hover ends
+        });
+    }
+
+    // Show/hide spectator mode badge
+    updateSpectatorBadge() {
+        const allAI = this.game.players.every(p => p.isAI);
+        let badge = document.getElementById('spectator-mode-badge');
+
+        if (allAI && !badge) {
+            badge = document.createElement('div');
+            badge.id = 'spectator-mode-badge';
+            badge.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, rgba(0, 212, 255, 0.95) 0%, rgba(0, 150, 200, 0.95) 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.95em;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                animation: fadeInDown 0.5s ease-out;
+                backdrop-filter: blur(10px);
+            `;
+            badge.innerHTML = `
+                <span style="font-size: 1.2em;">👁️</span>
+                <span>Spectator Mode - AI vs AI</span>
+            `;
+
+            // Add animation if not already added
+            if (!document.getElementById('spectator-badge-style')) {
+                const style = document.createElement('style');
+                style.id = 'spectator-badge-style';
+                style.textContent = `
+                    @keyframes fadeInDown {
+                        from {
+                            transform: translateX(-50%) translateY(-20px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(-50%) translateY(0);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(badge);
+        } else if (!allAI && badge) {
+            badge.remove();
+        }
     }
 
     // Update all UI elements
@@ -1039,5 +1129,6 @@ class UIManager {
         this.updatePlayersList();
         this.updateTurnDisplay();
         this.updateActionButtons();
+        this.updateSpectatorBadge();
     }
 }

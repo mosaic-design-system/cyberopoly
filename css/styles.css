@@ -680,12 +680,6 @@ body:has(#game-screen.active) {
     }
 }
 
-@media (max-height: 800px) {
-    #board {
-        transform: scale(0.65);
-    }
-}
-
 /* Board Spaces */
 .space {
     position: absolute;
@@ -948,28 +942,46 @@ body:has(#game-screen.active) {
 }
 
 .dice {
-    width: 50px;
-    height: 50px;
-    background: var(--bg-light);
-    border: 2px solid var(--primary-color);
-    border-radius: 8px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+    border: 3px solid var(--primary-500);
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: var(--primary-color);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-500);
+    box-shadow: var(--shadow-lg), var(--glow-primary-md);
+    transition: all var(--transition-base) var(--ease-out);
+}
+
+.dice:hover:not(.rolling) {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-xl), var(--glow-primary-lg);
 }
 
 .dice.rolling {
-    animation: roll 0.5s ease-in-out;
+    animation: diceRoll 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-@keyframes roll {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(90deg); }
-    50% { transform: rotate(180deg); }
-    75% { transform: rotate(270deg); }
+@keyframes diceRoll {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        transform: rotate(90deg) scale(1.2);
+    }
+    50% {
+        transform: rotate(180deg) scale(0.9);
+    }
+    75% {
+        transform: rotate(270deg) scale(1.2);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
 }
 
 /* === PANEL SYSTEM === */
@@ -1075,15 +1087,42 @@ body:has(#game-screen.active) {
 }
 
 .player-card {
-    background: var(--bg-light);
-    padding: 8px;
-    border-radius: 5px;
-    border: 2px solid transparent;
+    /* Enhanced gradient background */
+    background: linear-gradient(135deg,
+        var(--bg-light) 0%,
+        var(--bg-medium) 100%
+    );
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-default);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base) var(--ease-out);
+}
+
+.player-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-500);
 }
 
 .player-card.active {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    border-color: var(--primary-500);
+    background: linear-gradient(135deg,
+        rgba(0, 255, 65, 0.1) 0%,
+        var(--bg-light) 50%,
+        var(--bg-medium) 100%
+    );
+    box-shadow: var(--shadow-lg), var(--glow-primary-md);
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: var(--shadow-lg), var(--glow-primary-md);
+    }
+    50% {
+        box-shadow: var(--shadow-xl), var(--glow-primary-lg);
+    }
 }
 
 .player-card-header {
@@ -1094,15 +1133,21 @@ body:has(#game-screen.active) {
 }
 
 .player-token-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid white;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    border: 3px solid white;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-base) var(--ease-bounce);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2em;
     flex-shrink: 0;
+}
+
+.player-card:hover .player-token-icon {
+    transform: scale(1.1) rotate(5deg);
 }
 
 .player-name {
@@ -1389,21 +1434,39 @@ body:has(#game-screen.active) {
     flex-direction: column;
     gap: 10px;
     max-width: 400px;
-    pointer-events: none;
+    pointer-events: auto;
 }
 
 .ai-commentary-bubble {
-    background: linear-gradient(135deg, rgba(0, 255, 65, 0.95) 0%, rgba(0, 200, 50, 0.95) 100%);
-    color: var(--secondary-color);
+    /* Darker green base with stronger gradient for depth */
+    background: linear-gradient(135deg,
+        rgba(0, 180, 45, 0.98) 0%,
+        rgba(0, 140, 35, 0.98) 100%);
+
+    /* Pure white for maximum contrast */
+    color: #ffffff;
+
     padding: 15px 20px;
     border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 255, 65, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    font-size: 0.95em;
-    line-height: 1.4;
-    animation: slideInRight 0.4s ease-out, fadeOut 0.5s ease-in 4.5s forwards;
+
+    /* Enhanced glow effect for cyber aesthetic */
+    box-shadow:
+        0 5px 20px rgba(0, 255, 65, 0.5),
+        0 0 40px rgba(0, 255, 65, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+    /* Brighter border for definition */
+    border: 2px solid rgba(0, 255, 65, 0.6);
+
+    /* Slightly larger for readability */
+    font-size: 1em;
+    line-height: 1.5;
+
+    animation: slideInRight 0.4s ease-out, fadeOut 0.5s ease-in 7.5s forwards;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .ai-commentary-bubble::before {
@@ -1418,16 +1481,44 @@ body:has(#game-screen.active) {
 }
 
 .ai-commentary-bubble .player-name {
-    font-weight: bold;
+    font-weight: 700;
     display: block;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    opacity: 0.9;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+
+    /* Bright cyan for hierarchy without compromising contrast */
+    color: #00ffff;
+
+    /* Remove opacity - full strength needed */
+    opacity: 1;
+
+    /* Add subtle text shadow for extra definition */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    /* Cyber-style uppercase */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .ai-commentary-bubble .commentary-text {
     display: block;
-    font-weight: 500;
+
+    /* Stronger weight for body text */
+    font-weight: 600;
+
+    /* Pure white maintained from parent */
+    color: inherit;
+
+    /* Enhanced readability */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.ai-commentary-bubble:hover {
+    transform: translateX(-5px) scale(1.02);
+    box-shadow:
+        0 8px 25px rgba(0, 255, 65, 0.6),
+        0 0 50px rgba(0, 255, 65, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 @keyframes slideInRight {
