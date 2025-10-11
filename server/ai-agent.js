@@ -311,6 +311,34 @@ function generateFallbackCommentary(action, strategy, gameState) {
   return strategyComments[action] || "Making my move...";
 }
 
+// Test AI connection
+export async function testAIConnection() {
+  try {
+    await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 10,
+      messages: [
+        {
+          role: 'user',
+          content: 'Hi'
+        }
+      ]
+    });
+
+    return {
+      success: true,
+      model: 'claude-sonnet-4-20250514',
+      message: 'AI model connected successfully'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      details: error.status || 'Unknown error'
+    };
+  }
+}
+
 // Get AI decision
 export async function getAIDecision(gameState, player, strategy = 'balanced') {
   try {

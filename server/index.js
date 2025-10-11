@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { getAIDecision } from './ai-agent.js';
+import { getAIDecision, testAIConnection } from './ai-agent.js';
 
 // Load environment variables
 dotenv.config();
@@ -106,7 +106,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log('═══════════════════════════════════════════');
   console.log('  🎮 CyberOpoly AI Server');
   console.log('═══════════════════════════════════════════');
@@ -115,6 +115,27 @@ app.listen(PORT, () => {
   console.log(`  🤖 AI endpoint: http://localhost:${PORT}/api/ai-decision`);
   console.log(`  🔑 API Key: ${process.env.ANTHROPIC_API_KEY ? '✓ Configured' : '✗ Missing'}`);
   console.log('═══════════════════════════════════════════');
+
+  // Test AI connection
+  if (process.env.ANTHROPIC_API_KEY) {
+    console.log('\n  🔍 Testing AI model connection...');
+    const testResult = await testAIConnection();
+
+    if (testResult.success) {
+      console.log(`  ✅ AI Model: ${testResult.model}`);
+      console.log('  ✅ Status: Connected and working');
+    } else {
+      console.log('  ❌ AI Model: Connection FAILED');
+      console.log(`  ❌ Error: ${testResult.error}`);
+      console.log('  ⚠️  AI players will NOT work!');
+      console.log('  💡 Check your ANTHROPIC_API_KEY in server/.env');
+    }
+    console.log('═══════════════════════════════════════════\n');
+  } else {
+    console.log('\n  ⚠️  No API key configured - AI players will not work');
+    console.log('  💡 Add ANTHROPIC_API_KEY to server/.env');
+    console.log('═══════════════════════════════════════════\n');
+  }
 });
 
 // Graceful shutdown
