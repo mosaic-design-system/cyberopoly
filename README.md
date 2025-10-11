@@ -8,8 +8,18 @@ CyberOpoly is a browser-based board game that combines classic Monopoly gameplay
 
 ## 🎯 Features
 
-- **1-4 Player Support**: Play solo or with up to 4 players (hot-seat multiplayer)
+- **1-6 Player Support**: Play solo or with up to 6 players (hot-seat multiplayer)
+- **🤖 AI Players**: Autonomous AI opponents powered by Claude Sonnet 4.5 with personality-driven commentary
+  - Three playing styles: Aggressive, Balanced, Defensive
+  - Real-time AI decision commentary
+  - Spectator mode for watching AI vs AI matches
 - **40 Cybersecurity-Themed Spaces**: Including properties like "SIEM System", "Firewall", "Cloud Storage", and more
+- **Professional UI/UX**: Modern dark theme with cybersecurity aesthetic
+  - Smooth animations and micro-interactions
+  - Enhanced player cards with hover states
+  - Beautiful modal transitions with backdrop blur
+  - Toast notifications for important events
+  - Responsive design for various screen sizes
 - **Educational Content**: Learn about phishing, ransomware, compliance, incident response, and other cybersecurity topics
 - **Property Groups**:
   - Legacy Systems (Brown)
@@ -30,25 +40,36 @@ CyberOpoly is a browser-based board game that combines classic Monopoly gameplay
 
 - **British Currency**: All transactions in £ (pounds)
 - **Security Upgrades**: Instead of houses/hotels, upgrade security levels on properties
+- **Custom Player Tokens**: Choose from 12 unique emoji tokens
 - **Save/Load**: Game state can be saved to localStorage
-- **🤖 AI Players**: Autonomous AI opponents powered by Claude Sonnet 4.5 (optional backend required)
 
-## 🤖 AI Players (NEW!)
+## 🤖 AI Players
 
-CyberOpoly now supports autonomous AI opponents powered by Claude Sonnet 4.5! AI players:
+CyberOpoly features sophisticated AI opponents powered by Claude Sonnet 4.5! AI players:
 
-- Make strategic decisions based on game state
-- Use different playing styles (Aggressive, Balanced, Defensive)
-- Play completely autonomously - no human input needed
-- Learn and adapt to the game situation
-- Show their reasoning in the game log
+- **Strategic Decision-Making**: Make intelligent choices based on complete game state analysis
+- **Three Playing Styles**:
+  - **Aggressive**: Prioritizes property acquisition and upgrades, takes risks
+  - **Balanced**: Mix of offense and defense, moderate risk-taking
+  - **Defensive**: Conservative approach, focuses on cash reserves and stability
+- **Real-Time Commentary**: AI players explain their decisions with personality-driven commentary bubbles
+- **Fully Autonomous**: Play completely independently - no human input needed
+- **Spectator Mode**: Watch AI vs AI matches with enhanced UI indicators
+- **Smart Gameplay**: Purchase properties, upgrade assets, manage finances, and make tactical decisions
 
 **Quick Setup:**
 1. Get an Anthropic API key from [console.anthropic.com](https://console.anthropic.com)
 2. Follow the setup in `AI_SETUP.md`
-3. Start the backend server
-4. Check "🤖 AI Player" in game setup
-5. Watch AI players compete!
+3. Start the backend server: `cd server && npm start`
+4. Check "🤖 AI Player" checkbox during game setup
+5. Select AI strategy (Aggressive/Balanced/Defensive)
+6. Watch AI players compete!
+
+**Spectator Mode Features:**
+- Subtle corner "AI is thinking..." indicator (non-blocking)
+- AI commentary bubbles with cyan player names
+- "Spectator Mode - AI vs AI" badge when all players are AI
+- Extended commentary duration (8s) with hover-to-pause
 
 **More Details:** See `AI_SETUP.md` for complete setup instructions.
 
@@ -75,9 +96,12 @@ python3 -m http.server 8000
 
 ### Setup
 
-1. Select the number of players (1-4)
-2. Enter player names
-3. Click "Start Game"
+1. Select the number of players (1-6)
+2. Enter player names for each player
+3. (Optional) Check "🤖 AI Player" to enable AI control
+4. (Optional) Select AI strategy if using AI
+5. Choose player tokens from 12 unique emojis
+6. Click "Start Game"
 
 ### Gameplay
 
@@ -145,29 +169,47 @@ Every property, card, and game event includes:
 
 ## 🎨 Technologies Used
 
-- HTML5
-- CSS3 (with CSS Variables for theming)
-- Vanilla JavaScript (no frameworks)
-- LocalStorage for save games
+### Frontend
+- **HTML5**: Semantic markup for game structure
+- **CSS3**: Modern styling with CSS Variables, gradients, animations
+  - Custom design system with 8px grid spacing
+  - Professional typography (Space Grotesk, Inter, JetBrains Mono)
+  - Comprehensive color palette with accessibility in mind
+  - Smooth transitions and micro-interactions
+  - Responsive layout with flexbox and grid
+- **Vanilla JavaScript (ES6+)**: No frameworks, pure JS
+  - Object-oriented architecture with class-based components
+  - Event-driven UI updates
+  - LocalStorage for save games
+
+### Backend (Optional - for AI Players)
+- **Node.js** with Express server
+- **Anthropic SDK** for Claude AI integration
+- **Claude Sonnet 4.5 (20250514)**: Latest AI model for strategic gameplay
+- **RESTful API** for AI decision-making endpoint
 
 ## 📁 Project Structure
 
 ```
 cyberopoly/
-├── index.html              # Main game page
+├── index.html              # Main game page with semantic HTML5
 ├── css/
-│   └── styles.css         # All game styling
+│   └── styles.css         # All game styling (1600+ lines)
+│                          # - Design system with CSS variables
+│                          # - Professional component library
+│                          # - Responsive layouts
+│                          # - Animations and transitions
 ├── js/
 │   ├── data.js            # Board spaces and game constants
-│   ├── cards.js           # Card system and card data
-│   ├── player.js          # Player class
-│   ├── board.js           # Board management
-│   ├── game.js            # Core game logic
-│   ├── ui.js              # UI management and rendering
+│   ├── cards.js           # Card system and card data (50+ cards)
+│   ├── player.js          # Player class with AI support
+│   ├── board.js           # Board management and property logic
+│   ├── game.js            # Core game logic and turn management
+│   ├── ui.js              # UI management and rendering (1100+ lines)
 │   └── api-client.js      # AI backend API client
 ├── server/                 # AI Backend (optional)
-│   ├── index.js           # Express server
-│   ├── ai-agent.js        # Anthropic SDK & AI logic
+│   ├── index.js           # Express server (port 3001)
+│   ├── ai-agent.js        # Anthropic SDK & AI strategic logic
 │   ├── package.json       # Backend dependencies
 │   └── README.md          # Backend documentation
 ├── assets/
@@ -175,6 +217,9 @@ cyberopoly/
 │   └── sounds/            # (Future: sound effects)
 ├── AI_SETUP.md            # AI players setup guide
 ├── DEPLOYMENT.md          # Production deployment guide
+├── QUICKSTART.md          # Quick start guide
+├── UI_UX_ROADMAP.md       # Comprehensive UI/UX enhancement roadmap
+├── CLAUDE.md              # Development architecture documentation
 └── README.md              # This file
 ```
 
@@ -192,16 +237,31 @@ CyberOpoly is designed to:
 
 Potential features for future versions:
 
-- [x] **AI opponents for single-player** ✓ Now available!
+### Completed ✅
+- [x] **AI opponents for single-player** ✓ Powered by Claude Sonnet 4.5
+- [x] **Animations for movement and actions** ✓ Smooth dice rolls, player piece movement, modals
+- [x] **Difficulty levels / AI strategy customization** ✓ Three AI strategies available
+- [x] **Professional UI/UX design** ✓ Phase 1-3 of roadmap completed
+
+### Planned 📋
+- [ ] **Phase 4: Cybersecurity Theme Identity**
+  - Matrix-style background effects
+  - Terminal-style game log with `$` prefix
+  - Cyber-themed section headers
+  - Optional scanline CRT effects
+- [ ] **Phase 5: Accessibility & Final Polish**
+  - Enhanced keyboard navigation
+  - Screen reader support (ARIA labels)
+  - Reduced motion support
+  - High contrast mode
+  - Color blind friendly enhancements
 - [ ] Network multiplayer (using WebSockets)
 - [ ] Trading between players
 - [ ] Auction system for unowned properties
 - [ ] More card scenarios (100+ cards)
 - [ ] Sound effects and music
-- [ ] Animations for movement and actions
 - [ ] Mobile-responsive design improvements
 - [ ] Game statistics and achievements
-- [ ] Difficulty levels / AI strategy customization
 - [ ] Custom house rules
 - [ ] Quiz mode for additional learning
 - [ ] Integration with real threat intelligence feeds

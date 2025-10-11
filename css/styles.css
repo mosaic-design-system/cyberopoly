@@ -404,31 +404,73 @@ body:has(#game-screen.active) {
 }
 
 .token-option {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--border-color);
-    background: var(--bg-dark);
-    border-radius: 6px;
-    font-size: 1.3em;
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--border-default);
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
+    border-radius: var(--radius-lg);
+    font-size: 1.5em;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-base) var(--ease-out);
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.token-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity var(--transition-base) var(--ease-out);
 }
 
 .token-option:hover {
-    border-color: var(--primary-color);
-    transform: scale(1.1);
-    background: var(--bg-medium);
+    border-color: var(--primary-500);
+    transform: scale(1.15);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+}
+
+.token-option:hover::before {
+    opacity: 1;
 }
 
 .token-option.selected {
-    border-color: var(--primary-color);
-    background: var(--primary-color);
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-    transform: scale(1.05);
+    border-color: var(--primary-500);
+    background: linear-gradient(135deg,
+        var(--primary-500) 0%,
+        var(--primary-600) 100%
+    );
+    box-shadow: var(--shadow-lg), var(--glow-primary-md);
+    transform: scale(1.1);
+}
+
+.token-option.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: var(--success-color);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-500);
+    font-weight: var(--font-bold);
 }
 
 /* === BUTTON SYSTEM === */
@@ -586,6 +628,43 @@ body:has(#game-screen.active) {
     flex: 1;
 }
 
+/* Loading States */
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-default);
+    border-top-color: var(--primary-500);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Button loading state */
+.btn.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: var(--radius-full);
+    animation: spin 0.6s linear infinite;
+}
+
 /* Game Screen Layout */
 #game-screen.active {
     display: flex;
@@ -683,21 +762,23 @@ body:has(#game-screen.active) {
 /* Board Spaces */
 .space {
     position: absolute;
-    background: var(--bg-light);
-    border: 1px solid var(--border-color);
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+    border: 2px solid var(--border-default);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 5px;
+    padding: var(--space-2);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-base) var(--ease-out);
+    box-shadow: var(--shadow-sm);
 }
 
 .space:hover {
-    border-color: var(--primary-color);
-    transform: scale(1.05);
-    z-index: 10;
+    border-color: var(--primary-500);
+    transform: scale(1.08);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
 }
 
 /* Space type styling */
@@ -894,28 +975,43 @@ body:has(#game-screen.active) {
 
 /* Player Pieces */
 .player-piece {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
     position: absolute;
-    border: 2px solid white;
-    transition: all 0.25s ease-in-out;
-    z-index: 100;
+    border: 3px solid white;
+    transition: all 0.3s var(--ease-out);
+    z-index: var(--z-dropdown);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    box-shadow: var(--shadow-lg);
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
 }
 
 .player-piece.moving {
-    animation: bounce 0.3s ease-in-out;
-    z-index: 200;
+    animation: playerBounce 0.3s ease-in-out, playerGlow 0.3s ease-in-out;
+    z-index: var(--z-overlay);
+    transform: scale(1.3);
 }
 
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+@keyframes playerBounce {
+    0%, 100% {
+        transform: translateY(0) scale(1.3);
+    }
+    50% {
+        transform: translateY(-15px) scale(1.5);
+    }
+}
+
+@keyframes playerGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.8));
+    }
 }
 
 /* Center Area */
@@ -1206,29 +1302,56 @@ body:has(#game-screen.active) {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: var(--z-modal);
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+    transition: all var(--transition-slow) var(--ease-out);
 }
 
 .modal.active {
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: var(--blur-md);
+    animation: modalFadeIn var(--transition-slow) var(--ease-out);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
-    background: var(--bg-medium);
-    border: 2px solid var(--primary-color);
-    border-radius: 10px;
-    padding: 30px;
+    background: linear-gradient(135deg, var(--bg-medium) 0%, var(--bg-dark) 100%);
+    border: 2px solid var(--primary-500);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
     max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
+    box-shadow: var(--shadow-2xl), var(--glow-primary-lg);
+    animation: modalSlideUp var(--transition-slow) var(--ease-out);
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .close {
@@ -1247,12 +1370,16 @@ body:has(#game-screen.active) {
 
 /* Property Card in Modal */
 .property-card {
-    text-align: center;
+    text-align: left;
+    padding: var(--space-6);
 }
 
 .property-card h2 {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--border-default);
     color: var(--primary-color);
-    margin-bottom: 15px;
 }
 
 .property-purchase-modal {
@@ -1277,26 +1404,37 @@ body:has(#game-screen.active) {
 }
 
 .property-description {
-    background: var(--bg-light);
-    padding: 15px;
-    border-radius: 5px;
+    background: linear-gradient(135deg,
+        var(--bg-light) 0%,
+        var(--bg-medium) 100%
+    );
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary-500);
+    line-height: var(--leading-relaxed);
+    font-size: var(--text-base);
     margin: 15px 0;
     text-align: left;
-    line-height: 1.6;
 }
 
 .property-stats {
     background: var(--bg-dark);
-    padding: 15px;
-    border-radius: 5px;
-    margin: 15px 0;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin: var(--space-4) 0;
 }
 
 .stat-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background var(--transition-fast) var(--ease-out);
+}
+
+.stat-row:hover {
+    background: var(--bg-light);
+    padding-left: var(--space-2);
 }
 
 .stat-row:last-child {
@@ -1308,8 +1446,9 @@ body:has(#game-screen.active) {
 }
 
 .stat-value {
+    font-family: var(--font-mono);
+    font-weight: var(--font-bold);
     color: var(--primary-color);
-    font-weight: bold;
 }
 
 /* Card Display */
@@ -1421,6 +1560,76 @@ body:has(#game-screen.active) {
 
     .space-name {
         font-size: 0.5em;
+    }
+}
+
+/* Generic Toast Notification System */
+.toast-container {
+    position: fixed;
+    top: var(--space-5);
+    right: var(--space-5);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.toast {
+    background: linear-gradient(135deg,
+        var(--bg-medium) 0%,
+        var(--bg-light) 100%
+    );
+    border: 2px solid var(--primary-500);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-xl), var(--glow-primary-md);
+    animation: toastSlideIn 0.3s var(--ease-out),
+               toastFadeOut 0.3s var(--ease-in) 4.7s forwards;
+    pointer-events: auto;
+    color: var(--text-primary);
+}
+
+.toast.success {
+    border-color: var(--success-color);
+    box-shadow: var(--shadow-xl), var(--glow-success);
+}
+
+.toast.danger {
+    border-color: var(--danger-color);
+    box-shadow: var(--shadow-xl), var(--glow-danger);
+}
+
+.toast.warning {
+    border-color: var(--warning-color);
+    box-shadow: var(--shadow-xl), var(--glow-warning);
+}
+
+.toast.info {
+    border-color: var(--info-color);
+    box-shadow: var(--shadow-xl), var(--glow-info);
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(450px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastFadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
     }
 }
 
