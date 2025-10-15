@@ -65,6 +65,11 @@ class Game {
 
         this.log(`${player.name} rolled ${die1} + ${die2} = ${total}`, true);
 
+        // Record memory for AI players
+        if (player.isAI) {
+            player.addMemory(`I rolled ${die1} + ${die2} = ${total}${isDoubles ? ' (doubles!)' : ''}`);
+        }
+
         // Handle jail
         if (player.inJail) {
             player.jailTurns++;
@@ -83,6 +88,15 @@ class Game {
             } else {
                 this.log(`${player.name} remains in Quarantine (${player.jailTurns}/3 turns)`);
                 this.turnPhase = 'end';
+
+                // If AI player, schedule end turn
+                if (player.isAI) {
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                }
             }
             return { die1, die2, total, isDoubles };
         }
@@ -95,6 +109,21 @@ class Game {
                 player.sendToJail();
                 this.consecutiveDoubles = 0;
                 this.turnPhase = 'end';
+
+                // Update UI to show jail position
+                if (this.ui) {
+                    this.ui.updateAll();
+                }
+
+                // If AI player, schedule end turn
+                if (player.isAI) {
+                    setTimeout(() => {
+                        if (this.getCurrentPlayer().id === player.id && player.isAI) {
+                            this.handleAITurn();
+                        }
+                    }, 1000);
+                }
+
                 return { die1, die2, total, isDoubles };
             }
             this.log(`${player.name} rolled doubles! They get another turn after this one.`);
@@ -204,6 +233,14 @@ class Game {
                         player.money -= rent;
                         this.players[space.owner].money += rent;
                         this.log(`${player.name} paid £${rent} rent to ${this.players[space.owner].name}`, true);
+
+                        // Record memory for AI players
+                        if (player.isAI) {
+                            player.addMemory(`I paid £${rent} rent to ${this.players[space.owner].name} on ${space.name}`);
+                        }
+                        if (this.players[space.owner].isAI) {
+                            this.players[space.owner].addMemory(`I collected £${rent} rent from ${player.name} on ${space.name}`);
+                        }
 
                         // Check for bankruptcy
                         if (player.money < 0) {
@@ -375,6 +412,11 @@ class Game {
         this.board.setOwner(space.id, player.id);
 
         this.log(`${player.name} bought ${space.name} for £${space.price}`, true);
+
+        // Record memory for AI players
+        if (player.isAI) {
+            player.addMemory(`I bought ${space.name} for £${space.price}`);
+        }
 
         if (this.ui) {
             this.ui.updateAll();
@@ -550,9 +592,9 @@ class Game {
             // Get game state for AI
             const gameState = this.serializeGameState();
 
-            // Get AI decision
+            // Get AI decision (with conversation history for memory)
             this.log(`${player.name} (AI) is thinking...`);
-            const decision = await apiClient.getAIDecision(gameState, player, player.aiStrategy);
+            const decision = await apiClient.getAIDecision(gameState, player, player.aiStrategy, player.conversationHistory);
 
             if (!decision || !decision.action) {
                 throw new Error('Invalid AI decision received');
@@ -560,7 +602,7 @@ class Game {
 
             // Show AI commentary bubble if available
             if (decision.commentary && this.ui) {
-                this.ui.showAICommentary(player.name, decision.commentary);
+                this.ui.showAICommentary(player.name, decision.commentary, player.color);
             }
 
             // Execute the decision

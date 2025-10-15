@@ -1156,6 +1156,21 @@ body:has(#game-screen.active) {
         var(--bg-medium) 0%,
         var(--bg-dark) 100%
     );
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+#players-panel h3 {
+    flex-shrink: 0;
+}
+
+#players-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Game Log Panel */
@@ -1647,25 +1662,12 @@ body:has(#game-screen.active) {
 }
 
 .ai-commentary-bubble {
-    /* Darker green base with stronger gradient for depth */
-    background: linear-gradient(135deg,
-        rgba(0, 180, 45, 0.98) 0%,
-        rgba(0, 140, 35, 0.98) 100%);
-
-    /* Pure white for maximum contrast */
-    color: #ffffff;
-
+    /* Background and colors applied dynamically via JS based on player color */
     padding: 15px 20px;
     border-radius: 15px;
 
-    /* Enhanced glow effect for cyber aesthetic */
-    box-shadow:
-        0 5px 20px rgba(0, 255, 65, 0.5),
-        0 0 40px rgba(0, 255, 65, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-
-    /* Brighter border for definition */
-    border: 2px solid rgba(0, 255, 65, 0.6);
+    /* Border color will be set dynamically */
+    border: 2px solid rgba(255, 255, 255, 0.3);
 
     /* Slightly larger for readability */
     font-size: 1em;
@@ -1675,7 +1677,7 @@ body:has(#game-screen.active) {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out;
 }
 
 .ai-commentary-bubble::before {
@@ -1722,13 +1724,7 @@ body:has(#game-screen.active) {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.ai-commentary-bubble:hover {
-    transform: translateX(-5px) scale(1.02);
-    box-shadow:
-        0 8px 25px rgba(0, 255, 65, 0.6),
-        0 0 50px rgba(0, 255, 65, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
+/* Hover effects are applied dynamically via JS to match player color */
 
 @keyframes slideInRight {
     from {

@@ -74,7 +74,7 @@ app.get('/health', (req, res) => {
 // AI decision endpoint
 app.post('/api/ai-decision', async (req, res) => {
   try {
-    const { gameState, player, strategy } = req.body;
+    const { gameState, player, strategy, conversationHistory } = req.body;
 
     // Validate request body exists
     if (!req.body || typeof req.body !== 'object') {
@@ -127,9 +127,10 @@ app.post('/api/ai-decision', async (req, res) => {
     }
 
     console.log(`Processing AI decision for player: ${player.name} (Strategy: ${strategy || 'balanced'})`);
+    console.log(`  Memory entries: ${conversationHistory ? conversationHistory.length : 0}`);
 
-    // Get AI decision
-    const decision = await getAIDecision(gameState, player, strategy);
+    // Get AI decision (with conversation history for memory)
+    const decision = await getAIDecision(gameState, player, strategy, conversationHistory);
 
     console.log(`AI decision: ${decision.action} ${decision.reasoning ? '- ' + decision.reasoning : ''}`);
 

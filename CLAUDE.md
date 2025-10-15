@@ -12,12 +12,13 @@ CyberOpoly is an educational cybersecurity-themed Monopoly game with optional AI
 
 ### Frontend Development
 ```bash
-# Start frontend server (from project root)
+# Start frontend server
+cd frontend
 python3 -m http.server 8000
 # Visit http://localhost:8000
 
 # Or simply open index.html directly in browser
-open index.html
+open frontend/index.html
 ```
 
 **Important**: Frontend changes (HTML/CSS/JS) require **browser hard refresh** only:
@@ -28,7 +29,7 @@ open index.html
 ### Backend Development (AI Features)
 ```bash
 # Install dependencies (first time only)
-cd server
+cd backend
 npm install
 
 # Start backend server
@@ -39,13 +40,27 @@ npm start
 npm run dev
 ```
 
-**Important**: Backend changes (.js files in `/server/`) require **backend server restart**.
+**Important**: Backend changes (.js files in `/backend/`) require **backend server restart**.
 
 ### Environment Setup (AI Features)
 ```bash
-# Create .env file in /server/ directory
+# Create .env file in /backend/ directory
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 PORT=3001
+```
+
+### Docker Development
+```bash
+# Build and run frontend
+docker build -t cyberopoly-frontend ./frontend
+docker run -p 8000:8000 cyberopoly-frontend
+
+# Build and run backend
+docker build -t cyberopoly-backend ./backend
+docker run -p 3001:3001 -e ANTHROPIC_API_KEY=your-key-here cyberopoly-backend
+
+# Or use docker-compose (if available)
+docker-compose up
 ```
 
 ## Architecture
@@ -100,7 +115,7 @@ The game follows a **turn-based state machine**:
 5. Frontend executes action via executeAIDecision()
 ```
 
-**Backend Components** (`server/`):
+**Backend Components** (`backend/`):
 - **index.js**: Express server with CORS, health checks, AI endpoint
 - **ai-agent.js**: Anthropic SDK integration, prompt engineering, tool definitions
 

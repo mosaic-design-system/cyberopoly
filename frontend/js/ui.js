@@ -1027,14 +1027,54 @@ class UIManager {
         this.gameLog.scrollTop = 0;
     }
 
+    // Helper function to calculate if we need light or dark text based on background color
+    getContrastColor(hexColor) {
+        // Convert hex to RGB
+        const r = parseInt(hexColor.substr(1, 2), 16);
+        const g = parseInt(hexColor.substr(3, 2), 16);
+        const b = parseInt(hexColor.substr(5, 2), 16);
+
+        // Calculate relative luminance using WCAG formula
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+        // Return white for dark backgrounds, black for light backgrounds
+        return luminance > 0.5 ? '#000000' : '#ffffff';
+    }
+
+    // Darken a color for gradient effect
+    darkenColor(hexColor, percent = 20) {
+        const r = Math.max(0, parseInt(hexColor.substr(1, 2), 16) - (255 * percent / 100));
+        const g = Math.max(0, parseInt(hexColor.substr(3, 2), 16) - (255 * percent / 100));
+        const b = Math.max(0, parseInt(hexColor.substr(5, 2), 16) - (255 * percent / 100));
+
+        return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+    }
+
     // Show AI commentary bubble
-    showAICommentary(playerName, commentary) {
+    showAICommentary(playerName, commentary, playerColor) {
         const container = document.getElementById('ai-commentary-container');
         if (!container || !commentary) return;
+
+        // Use player color or default to green
+        const baseColor = playerColor || '#00b42d';
+        const darkerColor = this.darkenColor(baseColor, 20);
+        const textColor = this.getContrastColor(baseColor);
 
         // Create bubble element
         const bubble = document.createElement('div');
         bubble.className = 'ai-commentary-bubble';
+
+        // Apply dynamic colors
+        bubble.style.background = `linear-gradient(135deg, ${baseColor} 0%, ${darkerColor} 100%)`;
+        bubble.style.color = textColor;
+
+        // Set glow color to match player color
+        const glowColor = baseColor;
+        bubble.style.boxShadow = `
+            0 5px 20px ${glowColor}80,
+            0 0 40px ${glowColor}40,
+            inset 0 1px 0 rgba(255, 255, 255, 0.2)
+        `;
 
         bubble.innerHTML = `
             <span class="player-name">${playerName}</span>
@@ -1049,15 +1089,27 @@ class UIManager {
             bubble.remove();
         }, 8000);
 
-        // Pause removal on hover
+        // Enhanced hover effect with player color
         bubble.addEventListener('mouseenter', () => {
             clearTimeout(removalTimer);
             bubble.style.animationPlayState = 'paused';
+            bubble.style.transform = 'translateX(-5px) scale(1.02)';
+            bubble.style.boxShadow = `
+                0 8px 25px ${glowColor}99,
+                0 0 50px ${glowColor}4d,
+                inset 0 1px 0 rgba(255, 255, 255, 0.3)
+            `;
         });
 
         // Resume removal on mouse leave
         bubble.addEventListener('mouseleave', () => {
             bubble.style.animationPlayState = 'running';
+            bubble.style.transform = '';
+            bubble.style.boxShadow = `
+                0 5px 20px ${glowColor}80,
+                0 0 40px ${glowColor}40,
+                inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            `;
             removalTimer = setTimeout(() => {
                 bubble.remove();
             }, 2000); // Give 2 more seconds after hover ends

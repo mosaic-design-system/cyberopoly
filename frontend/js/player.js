@@ -17,6 +17,23 @@ class Player {
         // AI properties
         this.isAI = isAI;
         this.aiStrategy = aiStrategy; // 'aggressive', 'balanced', 'defensive'
+        this.conversationHistory = []; // Memory of game events for AI players
+    }
+
+    // Add memory entry for AI players (limited to last 10 events)
+    addMemory(event) {
+        if (!this.isAI) return; // Only track memory for AI players
+
+        this.conversationHistory.push({
+            turn: this.conversationHistory.length + 1,
+            event: event,
+            timestamp: Date.now()
+        });
+
+        // Keep only last 10 memories to avoid token bloat
+        if (this.conversationHistory.length > 10) {
+            this.conversationHistory.shift();
+        }
     }
 
     // Money management

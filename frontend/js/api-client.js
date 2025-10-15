@@ -48,7 +48,7 @@ class APIClient {
     }
 
     // Get AI decision for the current game state
-    async getAIDecision(gameState, player, strategy = 'balanced') {
+    async getAIDecision(gameState, player, strategy = 'balanced', conversationHistory = []) {
         try {
             // Check availability first
             const available = await this.checkAvailability();
@@ -68,7 +68,8 @@ class APIClient {
                 body: JSON.stringify({
                     gameState,
                     player,
-                    strategy
+                    strategy,
+                    conversationHistory // Pass AI player memory
                 }),
                 signal: controller.signal
             });

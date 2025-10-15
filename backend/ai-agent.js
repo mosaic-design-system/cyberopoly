@@ -176,7 +176,14 @@ Defensive:
 - "This property is expensive. Not risking my security budget on it."
 - "Hmm, too risky at this price. Better safe than sorry!"
 
-Think strategically and stay in character. Commentary first, then tool use!`;
+## Using Your Memory:
+If you have recent memories, REFERENCE them in your commentary to create narrative:
+- "Last turn I paid £250 to Player 1 - need to avoid their properties!"
+- "I've been collecting good rent on my properties - feeling confident!"
+- "Three turns ago I missed buying this property - not making that mistake again!"
+- "Player 2 keeps landing on my spaces - this rivalry is heating up!"
+
+Think strategically, reference your memories, and stay in character. Commentary first, then tool use!`;
 }
 
 // Format game state for Claude
@@ -340,12 +347,23 @@ export async function testAIConnection() {
 }
 
 // Get AI decision
-export async function getAIDecision(gameState, player, strategy = 'balanced') {
+export async function getAIDecision(gameState, player, strategy = 'balanced', conversationHistory = []) {
   try {
     const systemPrompt = getSystemPrompt(strategy);
     const gameStatePrompt = formatGameState(gameState, player);
 
     console.log(`Calling Claude API with strategy: ${strategy}`);
+    console.log(`  Conversation history: ${conversationHistory.length} entries`);
+
+    // Format conversation history for context
+    let memoryContext = '';
+    if (conversationHistory && conversationHistory.length > 0) {
+      memoryContext = '\n\n## Your Memory (Recent Events):\n';
+      conversationHistory.forEach((entry, index) => {
+        memoryContext += `${index + 1}. ${entry.event}\n`;
+      });
+      memoryContext += '\n**Use this memory to make strategic decisions and add personality to your commentary!**\n';
+    }
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -354,7 +372,7 @@ export async function getAIDecision(gameState, player, strategy = 'balanced') {
       messages: [
         {
           role: 'user',
-          content: gameStatePrompt
+          content: gameStatePrompt + memoryContext
         }
       ],
       tools: GAME_TOOLS,

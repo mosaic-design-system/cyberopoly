@@ -60,7 +60,7 @@ CyberOpoly features sophisticated AI opponents powered by Claude Sonnet 4.5! AI 
 **Quick Setup:**
 1. Get an Anthropic API key from [console.anthropic.com](https://console.anthropic.com)
 2. Follow the setup in `AI_SETUP.md`
-3. Start the backend server: `cd server && npm start`
+3. Start the backend server: `cd backend && npm start`
 4. Check "🤖 AI Player" checkbox during game setup
 5. Select AI strategy (Aggressive/Balanced/Defensive)
 6. Watch AI players compete!
@@ -83,11 +83,12 @@ CyberOpoly features sophisticated AI opponents powered by Claude Sonnet 4.5! AI 
 ### Quick Start (Human Players Only)
 
 1. Clone or download this repository
-2. Open `index.html` in your web browser
+2. Open `frontend/index.html` in your web browser
 3. That's it! The game runs entirely in your browser.
 
 ```bash
 # Optional: Run a local server
+cd frontend
 python3 -m http.server 8000
 # Then visit http://localhost:8000
 ```
@@ -99,24 +100,55 @@ python3 -m http.server 8000
 1. **Get an Anthropic API key** from [console.anthropic.com](https://console.anthropic.com)
 2. **Set up the backend**:
    ```bash
-   cd server
+   cd backend
    npm install
-   cp .env.example .env
+   cp ../.env.example .env
    # Edit .env and add your ANTHROPIC_API_KEY
    ```
 3. **Start both servers**:
    ```bash
    # Terminal 1: Start the game server
+   cd frontend
    python3 -m http.server 8000
 
    # Terminal 2: Start the AI backend
-   cd server
+   cd backend
    npm start
    ```
 4. **Open the game**: Visit `http://localhost:8000`
 5. **Enable AI players**: Check the "🤖 AI Player" checkbox during setup
 
 **Note**: Without the backend server running, AI players will not work. The game will function normally for human-only play.
+
+### Docker Deployment
+
+You can run the entire application using Docker:
+
+```bash
+# Set your API key (required for AI players)
+export ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Build and run with docker-compose
+docker-compose up
+
+# Or run in detached mode
+docker-compose up -d
+
+# Stop services
+docker-compose down
+```
+
+**Individual Services:**
+
+```bash
+# Build and run frontend only
+docker build -t cyberopoly-frontend ./frontend
+docker run -p 8000:8000 cyberopoly-frontend
+
+# Build and run backend only
+docker build -t cyberopoly-backend ./backend
+docker run -p 3001:3001 -e ANTHROPIC_API_KEY=your-key-here cyberopoly-backend
+```
 
 ## 📖 How to Play
 
@@ -218,35 +250,39 @@ Every property, card, and game event includes:
 
 ```
 cyberopoly/
-├── index.html              # Main game page with semantic HTML5
-├── css/
-│   └── styles.css         # All game styling (1600+ lines)
-│                          # - Design system with CSS variables
-│                          # - Professional component library
-│                          # - Responsive layouts
-│                          # - Animations and transitions
-├── js/
-│   ├── data.js            # Board spaces and game constants
-│   ├── cards.js           # Card system and card data (50+ cards)
-│   ├── player.js          # Player class with AI support
-│   ├── board.js           # Board management and property logic
-│   ├── game.js            # Core game logic and turn management
-│   ├── ui.js              # UI management and rendering (1100+ lines)
-│   └── api-client.js      # AI backend API client
-├── server/                 # AI Backend (optional)
-│   ├── index.js           # Express server (port 3001)
-│   ├── ai-agent.js        # Anthropic SDK & AI strategic logic
-│   ├── package.json       # Backend dependencies
-│   └── README.md          # Backend documentation
-├── assets/
-│   ├── images/            # (Future: board graphics, icons)
-│   └── sounds/            # (Future: sound effects)
-├── AI_SETUP.md            # AI players setup guide
-├── DEPLOYMENT.md          # Production deployment guide
-├── QUICKSTART.md          # Quick start guide
-├── UI_UX_ROADMAP.md       # Comprehensive UI/UX enhancement roadmap
-├── CLAUDE.md              # Development architecture documentation
-└── README.md              # This file
+├── frontend/              # Frontend application
+│   ├── index.html        # Main game page with semantic HTML5
+│   ├── css/
+│   │   └── styles.css   # All game styling (1600+ lines)
+│   │                    # - Design system with CSS variables
+│   │                    # - Professional component library
+│   │                    # - Responsive layouts
+│   │                    # - Animations and transitions
+│   ├── js/
+│   │   ├── data.js      # Board spaces and game constants
+│   │   ├── cards.js     # Card system and card data (50+ cards)
+│   │   ├── player.js    # Player class with AI support
+│   │   ├── board.js     # Board management and property logic
+│   │   ├── game.js      # Core game logic and turn management
+│   │   ├── ui.js        # UI management and rendering (1100+ lines)
+│   │   └── api-client.js # AI backend API client
+│   ├── assets/
+│   │   ├── images/      # (Future: board graphics, icons)
+│   │   └── sounds/      # (Future: sound effects)
+│   └── Dockerfile       # Frontend Docker configuration
+├── backend/              # AI Backend (optional)
+│   ├── index.js         # Express server (port 3001)
+│   ├── ai-agent.js      # Anthropic SDK & AI strategic logic
+│   ├── package.json     # Backend dependencies
+│   ├── README.md        # Backend documentation
+│   └── Dockerfile       # Backend Docker configuration
+├── AI_SETUP.md          # AI players setup guide
+├── DEPLOYMENT.md        # Production deployment guide
+├── QUICKSTART.md        # Quick start guide
+├── UI_UX_ROADMAP.md     # Comprehensive UI/UX enhancement roadmap
+├── CLAUDE.md            # Development architecture documentation
+├── services.yaml        # Service configuration for deployment
+└── README.md            # This file
 ```
 
 ## 🎓 Educational Goals
