@@ -2,9 +2,7 @@ services:
   - name: frontend
     path: ./frontend
     public: true
-    dockerfile: ./frontend/Dockerfile
     aarepo: 592311462240.dkr.ecr.eu-west-2.amazonaws.com/cyberopoly/dev/cyberopoly
-    # hack below to support html only site
     origin: lovable
     dependsOn:
       private:
