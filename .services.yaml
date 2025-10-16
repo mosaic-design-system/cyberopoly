@@ -3,16 +3,16 @@ services:
     path: ./frontend
     public: true
     dockerfile: ./frontend/Dockerfile
-    aarepo: 592311462240.dkr.ecr.eu-west-2.amazonaws.com/mds/dev/cyberopoly-frontend
+    aarepo: 592311462240.dkr.ecr.eu-west-2.amazonaws.com/cyberopoly/dev/cyberopoly
     # hack below to support html only site
-    origin: lovable]e
+    origin: lovable
     dependsOn:
       private:
         - backend
   - name: backend
     path: ./backend
     public: false
-    aarepo: 592311462240.dkr.ecr.eu-west-2.amazonaws.com/mds/dev/cyberopoly-backend
+    aarepo: 592311462240.dkr.ecr.eu-west-2.amazonaws.com/cyberopoly/dev/cyberopoly
     env:
       - ANTHROPIC_API_KEY
       - FRONTEND_URL
